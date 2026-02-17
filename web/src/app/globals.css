@@ -1,0 +1,298 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-golos-text), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+.case-study-main {
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.case-study-title {
+  margin-bottom: 8px;
+}
+
+.case-study-meta {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.case-study-excerpt {
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.case-study-cover {
+  margin: 24px 0;
+}
+
+.case-study-cover-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.pt-h2 {
+  margin-top: 28px;
+}
+
+.pt-h3 {
+  margin-top: 22px;
+}
+
+.pt-h4 {
+  margin-top: 18px;
+}
+
+.pt-blockquote {
+  border-left: 3px solid #ddd;
+  padding-left: 12px;
+  color: #444;
+}
+
+.pt-list {
+  padding-left: 20px;
+}
+
+.pt-figure {
+  margin: 24px 0;
+}
+
+.pt-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.pt-caption {
+  font-size: 14px;
+  color: #555;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.pt-divider {
+  margin: 26px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+.pt-divider-space {
+  height: 24px;
+}
+
+.pt-table-wrap {
+  overflow-x: auto;
+}
+
+.pt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pt-th {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 6px;
+}
+
+.pt-td {
+  padding: 8px 6px;
+}
+
+.pt-callout {
+  margin: 24px 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #d6dce5;
+  background: #f4f7fb;
+}
+
+.pt-callout-info {
+  border-color: #bfd7ff;
+  background: #edf5ff;
+}
+
+.pt-callout-success {
+  border-color: #bde5c8;
+  background: #edf9f1;
+}
+
+.pt-callout-warning {
+  border-color: #f2d2a3;
+  background: #fff7eb;
+}
+
+.pt-callout-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.pt-callout-text {
+  margin: 0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.pt-code-wrap {
+  margin: 24px 0;
+}
+
+.pt-code-caption {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.pt-code-pre {
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: #111;
+  color: #f5f5f5;
+  overflow-x: auto;
+}
+
+.pt-code-pre code {
+  font-family: "Consolas", "Menlo", "Monaco", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.cases-main {
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.home-main {
+  max-width: 860px;
+  margin: 80px auto;
+  padding: 0 16px;
+}
+
+.home-title {
+  margin-bottom: 12px;
+}
+
+.home-text {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.home-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cases-title {
+  margin-bottom: 8px;
+}
+
+.cases-subtitle {
+  margin-bottom: 16px;
+}
+
+.cases-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.cases-filter-link {
+  display: inline-block;
+  border: 1px solid #d7d7d7;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+}
+
+.cases-filter-link.is-active {
+  border-color: #222;
+  color: #fff;
+  background: #222;
+}
+
+.cases-list {
+  list-style: none;
+  padding: 0;
+}
+
+.cases-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+
+.cases-card-title {
+  margin: 0 0 8px;
+}
+
+.cases-card-excerpt {
+  margin: 0 0 8px;
+}
+
+.cases-card-meta {
+  font-size: 14px;
+  color: #555;
+}
+
+.cases-card-categories {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #444;
+}
+
+.case-study-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

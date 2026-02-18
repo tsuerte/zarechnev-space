@@ -1,5 +1,6 @@
 import type {Metadata} from 'next'
 import {Golos_Text} from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const golosText = Golos_Text({
@@ -21,7 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={golosText.variable}>{children}</body>
+      <body className={golosText.variable}>
+        {children}
+        <Script
+          src="https://timeweb.cloud/api/v1/cloud-ai/agents/627a97d4-e893-4f60-92eb-f5462dd08092/embed.js?collapsed=true"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   )
 }

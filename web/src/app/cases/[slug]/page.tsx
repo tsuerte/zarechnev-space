@@ -1,13 +1,14 @@
-import type {Metadata} from 'next'
-import Image from 'next/image'
-import Link from 'next/link'
-import {notFound} from 'next/navigation'
+import type { Metadata } from "next"
+import Image from "next/image"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
-import {PortableTextRenderer} from '@/components/portable-text'
-import {sanityClient} from '@/lib/sanity/client'
-import {formatPublishedDate} from '@/lib/date'
-import {caseStudyBySlugQuery, caseStudySlugsQuery} from '@/lib/sanity/queries'
-import type {CaseStudy} from '@/lib/sanity/types'
+import { PortableTextRenderer } from "@/components/portable-text"
+import { formatPublishedDate } from "@/lib/date"
+import { sanityClient } from "@/lib/sanity/client"
+import { caseStudyBySlugQuery, caseStudySlugsQuery } from "@/lib/sanity/queries"
+import type { CaseStudy } from "@/lib/sanity/types"
+import { Badge, Separator } from "@/ui-kit"
 
 type PageParams = {
   slug: string
@@ -20,21 +21,25 @@ type CaseStudySlug = {
 export const revalidate = 300
 
 async function getCaseStudy(slug: string): Promise<CaseStudy | null> {
-  return sanityClient.fetch<CaseStudy | null>(caseStudyBySlugQuery, {slug})
+  return sanityClient.fetch<CaseStudy | null>(caseStudyBySlugQuery, { slug })
 }
 
 export async function generateStaticParams() {
   const slugs = await sanityClient.fetch<CaseStudySlug[]>(caseStudySlugsQuery)
-  return slugs.map((item) => ({slug: item.slug}))
+  return slugs.map((item) => ({ slug: item.slug }))
 }
 
-export async function generateMetadata({params}: {params: Promise<PageParams>}): Promise<Metadata> {
-  const {slug} = await params
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<PageParams>
+}): Promise<Metadata> {
+  const { slug } = await params
   const item = await getCaseStudy(slug)
 
   if (!item) {
     return {
-      title: 'Not found',
+      title: "Not found",
     }
   }
 
@@ -44,8 +49,12 @@ export async function generateMetadata({params}: {params: Promise<PageParams>}):
   }
 }
 
-export default async function CaseStudyPage({params}: {params: Promise<PageParams>}) {
-  const {slug} = await params
+export default async function CaseStudyPage({
+  params,
+}: {
+  params: Promise<PageParams>
+}) {
+  const { slug } = await params
   const item = await getCaseStudy(slug)
 
   if (!item) {
@@ -57,47 +66,73 @@ export default async function CaseStudyPage({params}: {params: Promise<PageParam
   const coverHeight = item.coverImage?.asset?.metadata?.dimensions?.height ?? 675
 
   return (
-    <main className="case-study-main">
-      <article>
-        <h1 className="case-study-title">{item.title}</h1>
+    <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <article className="space-y-8">
+        <header className="space-y-4">
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
+            {item.title}
+          </h1>
 
-        <div className="case-study-meta">{formatPublishedDate(item.publishedAt)}</div>
+          <p className="text-sm text-muted-foreground">
+            {formatPublishedDate(item.publishedAt)}
+          </p>
 
-        {item.categories?.length ? (
-          <div className="case-study-meta case-study-category-list">
-            {item.categories.map((category, index) => {
-              if (!category.slug) {
-                return <span key={`${category.title}-${index}`}>{category.title}</span>
-              }
+          {item.categories?.length ? (
+            <div className="flex flex-wrap gap-2">
+              {item.categories.map((category, index) => {
+                if (!category.slug) {
+                  return (
+                    <Badge key={`${category.title}-${index}`} variant="outline">
+                      {category.title}
+                    </Badge>
+                  )
+                }
 
-              return (
-                <Link key={category.slug} href={`/cases?category=${encodeURIComponent(category.slug)}`}>
-                  {category.title}
-                </Link>
-              )
-            })}
-          </div>
-        ) : null}
+                return (
+                  <Badge key={category.slug} asChild variant="outline">
+                    <Link href={`/cases?category=${encodeURIComponent(category.slug)}`}>
+                      {category.title}
+                    </Link>
+                  </Badge>
+                )
+              })}
+            </div>
+          ) : null}
 
-        {item.excerpt ? <p className="case-study-excerpt">{item.excerpt}</p> : null}
+          {item.excerpt ? (
+            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              {item.excerpt}
+            </p>
+          ) : null}
+        </header>
 
         {coverUrl && item.coverImage?.alt ? (
-          <figure className="case-study-cover">
+          <figure className="space-y-2">
             <Image
               src={coverUrl}
               alt={item.coverImage.alt}
               width={coverWidth}
               height={coverHeight}
-              className="case-study-cover-image"
-              placeholder={item.coverImage.asset?.metadata?.lqip ? 'blur' : 'empty'}
+              className="w-full rounded-xl border object-cover"
+              placeholder={item.coverImage.asset?.metadata?.lqip ? "blur" : "empty"}
               blurDataURL={item.coverImage.asset?.metadata?.lqip}
               priority
             />
-            {item.coverImage.caption ? <figcaption className="pt-caption">{item.coverImage.caption}</figcaption> : null}
+            {item.coverImage.caption ? (
+              <figcaption className="text-center text-sm text-muted-foreground">
+                {item.coverImage.caption}
+              </figcaption>
+            ) : null}
           </figure>
         ) : null}
 
-        {item.body?.length ? <PortableTextRenderer value={item.body} /> : <p>Content is empty.</p>}
+        <Separator />
+
+        {item.body?.length ? (
+          <PortableTextRenderer value={item.body} />
+        ) : (
+          <p className="text-sm text-muted-foreground">Контент пока не заполнен.</p>
+        )}
       </article>
     </main>
   )

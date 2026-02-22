@@ -1,13 +1,28 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from "next/image"
+import Link from "next/link"
 import {
   PortableText,
   type PortableTextBlock,
   type PortableTextComponents,
-} from '@portabletext/react'
+} from "@portabletext/react"
+
+import { cn } from "@/lib/utils"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Separator,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/ui-kit"
 
 type ContentImageValue = {
-  _type: 'contentImage'
+  _type: "contentImage"
   alt: string
   caption?: string
   asset?: {
@@ -23,68 +38,102 @@ type ContentImageValue = {
 }
 
 type DividerValue = {
-  _type: 'divider'
-  style?: 'line' | 'space'
+  _type: "divider"
+  style?: "line" | "space"
 }
 
-type TableRow = {
+type TableRowType = {
   _key?: string
   cells?: string[]
 }
 
 type SimpleTableValue = {
-  _type: 'simpleTable'
+  _type: "simpleTable"
   caption?: string
-  rows?: TableRow[]
+  rows?: TableRowType[]
 }
 
 type CalloutValue = {
-  _type: 'callout'
-  tone?: 'info' | 'success' | 'warning'
+  _type: "callout"
+  tone?: "info" | "success" | "warning"
   title?: string
   text?: string
 }
 
 type CodeBlockValue = {
-  _type: 'codeBlock'
+  _type: "codeBlock"
   filename?: string
   language?: string
   code?: string
 }
 
+const calloutToneStyles: Record<NonNullable<CalloutValue["tone"]>, string> = {
+  info: "border-blue-200 bg-blue-50 text-blue-950",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-950",
+  warning: "border-amber-200 bg-amber-50 text-amber-950",
+}
+
 const components: PortableTextComponents = {
   block: {
-    h2: ({children}) => <h2 className="pt-h2">{children}</h2>,
-    h3: ({children}) => <h3 className="pt-h3">{children}</h3>,
-    h4: ({children}) => <h4 className="pt-h4">{children}</h4>,
-    blockquote: ({children}) => (
-      <blockquote className="pt-blockquote">
+    normal: ({ children }) => (
+      <p className="mt-5 text-base leading-7 text-foreground first:mt-0">{children}</p>
+    ),
+    h2: ({ children }) => (
+      <h2 className="mt-10 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="mt-8 scroll-m-20 text-xl font-semibold tracking-tight">{children}</h3>
+    ),
+    h4: ({ children }) => (
+      <h4 className="mt-6 scroll-m-20 text-lg font-semibold tracking-tight">{children}</h4>
+    ),
+    blockquote: ({ children }) => (
+      <blockquote className="mt-6 border-l-2 pl-5 text-muted-foreground italic">
         {children}
       </blockquote>
     ),
   },
   list: {
-    bullet: ({children}) => <ul className="pt-list">{children}</ul>,
-    number: ({children}) => <ol className="pt-list">{children}</ol>,
+    bullet: ({ children }) => (
+      <ul className="my-5 ml-6 list-disc space-y-2 text-base leading-7 marker:text-muted-foreground">
+        {children}
+      </ul>
+    ),
+    number: ({ children }) => (
+      <ol className="my-5 ml-6 list-decimal space-y-2 text-base leading-7 marker:text-muted-foreground">
+        {children}
+      </ol>
+    ),
   },
   marks: {
-    link: ({value, children}) => {
+    link: ({ value, children }) => {
       const href = value?.href as string | undefined
       if (!href) return <>{children}</>
 
-      if (href.startsWith('/')) {
-        return <Link href={href}>{children}</Link>
+      if (href.startsWith("/")) {
+        return (
+          <Link href={href} className="underline decoration-muted-foreground/60 underline-offset-4">
+            {children}
+          </Link>
+        )
       }
 
       return (
-        <a href={href} target="_blank" rel="noreferrer noopener">
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="underline decoration-muted-foreground/60 underline-offset-4"
+        >
           {children}
         </a>
       )
     },
   },
   types: {
-    contentImage: ({value}) => {
+    contentImage: ({ value }) => {
       const image = value as ContentImageValue
       const imageUrl = image?.asset?.url
 
@@ -94,32 +143,34 @@ const components: PortableTextComponents = {
       const height = image.asset?.metadata?.dimensions?.height ?? 675
 
       return (
-        <figure className="pt-figure">
+        <figure className="my-8 space-y-2">
           <Image
             src={imageUrl}
             alt={image.alt}
             width={width}
             height={height}
-            className="pt-image"
-            placeholder={image.asset?.metadata?.lqip ? 'blur' : 'empty'}
+            className="h-auto w-full rounded-xl border"
+            placeholder={image.asset?.metadata?.lqip ? "blur" : "empty"}
             blurDataURL={image.asset?.metadata?.lqip}
           />
           {image.caption ? (
-            <figcaption className="pt-caption">{image.caption}</figcaption>
+            <figcaption className="text-center text-sm text-muted-foreground">
+              {image.caption}
+            </figcaption>
           ) : null}
         </figure>
       )
     },
-    divider: ({value}) => {
+    divider: ({ value }) => {
       const divider = value as DividerValue
 
-      if (divider?.style === 'space') {
-        return <div className="pt-divider-space" aria-hidden="true" />
+      if (divider?.style === "space") {
+        return <div className="my-8 h-8" aria-hidden="true" />
       }
 
-      return <hr className="pt-divider" />
+      return <Separator className="my-8" />
     },
-    simpleTable: ({value}) => {
+    simpleTable: ({ value }) => {
       const table = value as SimpleTableValue
       const rows = table?.rows ?? []
 
@@ -128,60 +179,68 @@ const components: PortableTextComponents = {
       const [header, ...body] = rows
 
       return (
-        <figure className="pt-figure">
-          <div className="pt-table-wrap">
-            <table className="pt-table">
-              <thead>
-                <tr>
-                  {(header.cells ?? []).map((cell, index) => (
-                    <th key={`head-${index}`} className="pt-th">
-                      {cell}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {body.map((row, rowIndex) => (
-                  <tr key={row._key ?? `row-${rowIndex}`}>
-                    {(row.cells ?? []).map((cell, cellIndex) => (
-                      <td key={`cell-${rowIndex}-${cellIndex}`} className="pt-td">
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
+        <figure className="my-8">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {(header.cells ?? []).map((cell, index) => (
+                  <TableHead key={`head-${index}`} className="whitespace-normal align-top">
+                    {cell}
+                  </TableHead>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          {table.caption ? (
-            <figcaption className="pt-caption">{table.caption}</figcaption>
-          ) : null}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {body.map((row, rowIndex) => (
+                <TableRow key={row._key ?? `row-${rowIndex}`}>
+                  {(row.cells ?? []).map((cell, cellIndex) => (
+                    <TableCell
+                      key={`cell-${rowIndex}-${cellIndex}`}
+                      className="whitespace-normal align-top"
+                    >
+                      {cell}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+            {table.caption ? <TableCaption>{table.caption}</TableCaption> : null}
+          </Table>
         </figure>
       )
     },
-    callout: ({value}) => {
+    callout: ({ value }) => {
       const callout = value as CalloutValue
-      const tone = callout.tone || 'info'
+      const tone = callout.tone || "info"
 
       if (!callout.text) return null
 
       return (
-        <aside className={`pt-callout pt-callout-${tone}`} role="note">
-          {callout.title ? <h4 className="pt-callout-title">{callout.title}</h4> : null}
-          <p className="pt-callout-text">{callout.text}</p>
-        </aside>
+        <Alert className={cn("my-8", calloutToneStyles[tone])}>
+          {callout.title ? <AlertTitle>{callout.title}</AlertTitle> : null}
+          <AlertDescription className="text-current">
+            {callout.text}
+          </AlertDescription>
+        </Alert>
       )
     },
-    codeBlock: ({value}) => {
+    codeBlock: ({ value }) => {
       const block = value as CodeBlockValue
 
       if (!block.code) return null
 
       return (
-        <figure className="pt-code-wrap">
-          {block.filename ? <figcaption className="pt-code-caption">{block.filename}</figcaption> : null}
-          <pre className="pt-code-pre">
-            <code data-language={block.language || 'text'}>{block.code}</code>
+        <figure className="my-8 space-y-2">
+          {block.filename ? (
+            <figcaption className="text-sm text-muted-foreground">{block.filename}</figcaption>
+          ) : null}
+          <pre className="overflow-x-auto rounded-xl border bg-muted px-4 py-3">
+            <code
+              data-language={block.language || "text"}
+              className="font-mono text-[13px] leading-6"
+            >
+              {block.code}
+            </code>
           </pre>
         </figure>
       )
@@ -193,6 +252,6 @@ type PortableTextRendererProps = {
   value: PortableTextBlock[]
 }
 
-export function PortableTextRenderer({value}: PortableTextRendererProps) {
+export function PortableTextRenderer({ value }: PortableTextRendererProps) {
   return <PortableText value={value} components={components} />
 }

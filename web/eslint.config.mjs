@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
             {
               group: ["@/components/ui/*"],
               message:
-                "Import UI primitives via '@/ui-kit' instead of '@/components/ui/*'.",
+                "Import via '@/ui-kit'. Put custom behavior in 'src/ui-kit/*' wrappers, not app code.",
             },
           ],
         },

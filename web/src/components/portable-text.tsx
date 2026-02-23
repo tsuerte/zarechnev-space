@@ -168,7 +168,7 @@ const components: PortableTextComponents = {
         return <div className="my-7 h-7" aria-hidden="true" />
       }
 
-      return <Separator className="my-7" />
+      return <Separator className="my-7 bg-muted-foreground/25" />
     },
     simpleTable: ({ value }) => {
       const table = value as SimpleTableValue

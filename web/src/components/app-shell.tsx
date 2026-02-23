@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment } from "react"
+import { Fragment, useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -43,7 +43,21 @@ function resolveSectionLabel(pathname: string) {
   return "Build Your Application"
 }
 
-function buildCrumbs(pathname: string): Crumb[] {
+function resolveCrumbLabel(
+  parts: string[],
+  index: number,
+  segment: string,
+  caseTitleBySlug: Map<string, string>
+) {
+  if (parts[0] === "cases" && index === 1) {
+    const decodedSlug = decodeURIComponent(segment)
+    return caseTitleBySlug.get(decodedSlug) ?? humanizeSegment(segment)
+  }
+
+  return humanizeSegment(segment)
+}
+
+function buildCrumbs(pathname: string, caseTitleBySlug: Map<string, string>): Crumb[] {
   const sectionCrumb: Crumb = {
     key: "section",
     href: "/",
@@ -62,7 +76,7 @@ function buildCrumbs(pathname: string): Crumb[] {
   const pathCrumbs = parts.map((part, index) => ({
     key: `path-${index}`,
     href: `/${parts.slice(0, index + 1).join("/")}`,
-    label: humanizeSegment(part),
+    label: resolveCrumbLabel(parts, index, part, caseTitleBySlug),
   }))
 
   return [sectionCrumb, ...pathCrumbs]
@@ -75,7 +89,11 @@ type AppShellProps = {
 
 export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
   const pathname = usePathname()
-  const crumbs = buildCrumbs(pathname)
+  const caseTitleBySlug = useMemo(
+    () => new Map(sidebarCaseItems.map((caseItem) => [caseItem.slug, caseItem.title])),
+    [sidebarCaseItems]
+  )
+  const crumbs = buildCrumbs(pathname, caseTitleBySlug)
 
   return (
     <SidebarProvider>
@@ -85,7 +103,7 @@ export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
           <SidebarTrigger className="-ml-1" />
           <Separator
             orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+            className="mr-2 h-4 self-auto"
           />
           <Breadcrumb>
             <BreadcrumbList>

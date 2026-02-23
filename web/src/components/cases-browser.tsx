@@ -33,7 +33,7 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
 
   return (
     <>
-      <section className="mb-6 flex flex-wrap gap-2">
+      <section className="mb-5 flex flex-wrap gap-2">
         <Button
           asChild
           size="sm"
@@ -65,11 +65,11 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
           Для этой категории пока нет опубликованных кейсов.
         </p>
       ) : (
-        <ul className="grid gap-4">
+        <ul className="grid gap-5">
           {filteredCaseStudies.map((item) => (
             <li key={item._id}>
               <Card>
-                <CardHeader className="gap-2">
+                <CardHeader className="gap-1.5">
                   <CardTitle className="text-xl">
                     {item.slug ? (
                       <Link href={`/cases/${item.slug}`} className="hover:underline">
@@ -87,7 +87,7 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
                   ) : null}
                 </CardHeader>
 
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2.5">
                   <p className="text-sm text-muted-foreground">
                     {formatPublishedDate(item.publishedAt)}
                   </p>

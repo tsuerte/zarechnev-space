@@ -66,9 +66,9 @@ export default async function CaseStudyPage({
   const coverHeight = item.coverImage?.asset?.metadata?.dimensions?.height ?? 675
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-      <article className="space-y-8">
-        <header className="space-y-4">
+    <main className="mx-auto w-full max-w-3xl">
+      <article className="space-y-7">
+        <header className="space-y-3">
           <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             {item.title}
           </h1>
@@ -78,7 +78,7 @@ export default async function CaseStudyPage({
           </p>
 
           {item.categories?.length ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {item.categories.map((category, index) => {
                 if (!category.slug) {
                   return (
@@ -100,7 +100,7 @@ export default async function CaseStudyPage({
           ) : null}
 
           {item.excerpt ? (
-            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
               {item.excerpt}
             </p>
           ) : null}

@@ -32,8 +32,8 @@ export default async function CasesPage() {
   ])
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="space-y-3">
+    <main className="mx-auto w-full max-w-5xl space-y-6">
+      <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Кейсы</h1>
         <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           Все кейсы с фильтром по категориям через URL-параметр
@@ -42,7 +42,7 @@ export default async function CasesPage() {
         </p>
       </header>
 
-      <Separator className="my-8" />
+      <Separator />
 
       <Suspense fallback={<p className="text-sm text-muted-foreground">Загрузка кейсов...</p>}>
         <CasesBrowser caseStudies={caseStudies} categories={categories} />

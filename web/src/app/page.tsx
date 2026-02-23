@@ -1,12 +1,12 @@
-import { RiArrowRightLine } from "@remixicon/react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 import { Badge, Button } from "@/ui-kit"
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center px-4 py-16 sm:px-6 lg:px-8">
-      <section className="space-y-6">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 items-center py-6 md:py-8">
+      <section className="w-full max-w-3xl space-y-5">
         <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs">
           Portfolio
         </Badge>
@@ -22,7 +22,7 @@ export default function HomePage() {
         <Button asChild size="lg">
           <Link href="/cases">
             Перейти в кейсы
-            <RiArrowRightLine aria-hidden="true" />
+            <ArrowRight aria-hidden="true" />
           </Link>
         </Button>
       </section>

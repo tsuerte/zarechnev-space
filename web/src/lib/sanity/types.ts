@@ -33,3 +33,8 @@ export type CaseStudy = CaseStudyListItem & {
   coverImage?: SanityImage
   body?: PortableTextBlock[]
 }
+
+export type SidebarCaseItem = {
+  title: string
+  slug: string
+}

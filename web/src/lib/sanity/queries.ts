@@ -59,6 +59,14 @@ export const caseStudyBySlugQuery = groq`*[_type == "caseStudy" && slug.current 
 
 export const caseStudySlugsQuery = groq`*[_type == "caseStudy" && defined(slug.current)]{"slug": slug.current}`
 
+export const sidebarCaseItemsQuery = groq`*[
+  _type == "caseStudy" &&
+  defined(slug.current)
+] | order(coalesce(publishedAt, _createdAt) desc) {
+  title,
+  "slug": slug.current
+}`
+
 export const categoriesQuery = groq`*[_type == "category"] | order(title asc) {
   title,
   "slug": slug.current

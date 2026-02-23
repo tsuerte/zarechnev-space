@@ -76,33 +76,33 @@ const calloutToneStyles: Record<NonNullable<CalloutValue["tone"]>, string> = {
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
-      <p className="mt-5 text-base leading-7 text-foreground first:mt-0">{children}</p>
+      <p className="mt-4 text-base leading-7 text-foreground first:mt-0">{children}</p>
     ),
     h2: ({ children }) => (
-      <h2 className="mt-10 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 scroll-m-20 text-xl font-semibold tracking-tight">{children}</h3>
+      <h3 className="mt-7 scroll-m-20 text-xl font-semibold tracking-tight">{children}</h3>
     ),
     h4: ({ children }) => (
-      <h4 className="mt-6 scroll-m-20 text-lg font-semibold tracking-tight">{children}</h4>
+      <h4 className="mt-5 scroll-m-20 text-lg font-semibold tracking-tight">{children}</h4>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="mt-6 border-l-2 pl-5 text-muted-foreground italic">
+      <blockquote className="mt-5 border-l-2 pl-5 text-muted-foreground italic">
         {children}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="my-5 ml-6 list-disc space-y-2 text-base leading-7 marker:text-muted-foreground">
+      <ul className="my-4 ml-6 list-disc space-y-1.5 text-base leading-7 marker:text-muted-foreground">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="my-5 ml-6 list-decimal space-y-2 text-base leading-7 marker:text-muted-foreground">
+      <ol className="my-4 ml-6 list-decimal space-y-1.5 text-base leading-7 marker:text-muted-foreground">
         {children}
       </ol>
     ),
@@ -143,7 +143,7 @@ const components: PortableTextComponents = {
       const height = image.asset?.metadata?.dimensions?.height ?? 675
 
       return (
-        <figure className="my-8 space-y-2">
+        <figure className="my-7 space-y-2.5">
           <Image
             src={imageUrl}
             alt={image.alt}
@@ -165,10 +165,10 @@ const components: PortableTextComponents = {
       const divider = value as DividerValue
 
       if (divider?.style === "space") {
-        return <div className="my-8 h-8" aria-hidden="true" />
+        return <div className="my-7 h-7" aria-hidden="true" />
       }
 
-      return <Separator className="my-8" />
+      return <Separator className="my-7" />
     },
     simpleTable: ({ value }) => {
       const table = value as SimpleTableValue
@@ -179,7 +179,7 @@ const components: PortableTextComponents = {
       const [header, ...body] = rows
 
       return (
-        <figure className="my-8">
+        <figure className="my-7">
           <Table>
             <TableHeader>
               <TableRow>
@@ -216,7 +216,7 @@ const components: PortableTextComponents = {
       if (!callout.text) return null
 
       return (
-        <Alert className={cn("my-8", calloutToneStyles[tone])}>
+        <Alert className={cn("my-7", calloutToneStyles[tone])}>
           {callout.title ? <AlertTitle>{callout.title}</AlertTitle> : null}
           <AlertDescription className="text-current">
             {callout.text}
@@ -230,7 +230,7 @@ const components: PortableTextComponents = {
       if (!block.code) return null
 
       return (
-        <figure className="my-8 space-y-2">
+        <figure className="my-7 space-y-2.5">
           {block.filename ? (
             <figcaption className="text-sm text-muted-foreground">{block.filename}</figcaption>
           ) : null}

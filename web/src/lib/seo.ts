@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-export const SITE_BRAND = "zarechnev.space"
+export const SITE_BRAND = "Андрей Заречнев - Product Designer"
 export const SITE_DEFAULT_TITLE = "Андрей Заречнев - Product Designer"
 export const SITE_DESCRIPTION = "Усиливаю системную роль дизайна в продукте"
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://zarechnev.space").replace(/\/$/, "")

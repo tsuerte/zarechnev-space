@@ -2,10 +2,17 @@ import { Suspense } from "react"
 import { unstable_cache } from "next/cache"
 
 import { CasesBrowser } from "@/components/cases-browser"
+import { buildMetadata } from "@/lib/seo"
 import { sanityClient } from "@/lib/sanity/client"
 import { caseStudiesListQuery, categoriesQuery } from "@/lib/sanity/queries"
 import type { CaseCategory, CaseStudyListItem } from "@/lib/sanity/types"
 import { Separator } from "@/ui-kit"
+
+export const metadata = buildMetadata({
+  title: "Кейсы",
+  description: "Каталог кейсов с фильтрацией по категориям.",
+  path: "/cases",
+})
 
 export const revalidate = 300
 

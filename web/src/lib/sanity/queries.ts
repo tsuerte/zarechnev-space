@@ -59,6 +59,15 @@ export const caseStudyBySlugQuery = groq`*[_type == "caseStudy" && slug.current 
 
 export const caseStudySlugsQuery = groq`*[_type == "caseStudy" && defined(slug.current)]{"slug": slug.current}`
 
+export const caseStudySitemapQuery = groq`*[
+  _type == "caseStudy" &&
+  defined(slug.current)
+]{
+  "slug": slug.current,
+  publishedAt,
+  _updatedAt
+}`
+
 export const sidebarCaseItemsQuery = groq`*[
   _type == "caseStudy" &&
   defined(slug.current)

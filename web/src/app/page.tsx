@@ -1,7 +1,12 @@
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 
+import { buildMetadata } from "@/lib/seo"
 import { Badge, Button } from "@/ui-kit"
+
+export const metadata = buildMetadata({
+  path: "/",
+})
 
 export default function HomePage() {
   return (

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "npm run lint && npm run build"
+    "seo:check": "node scripts/check-page-metadata.mjs",
+    "check": "npm run seo:check && npm run lint && npm run build"
   },
   "dependencies": {
     "@portabletext/react": "^6.0.2",

@@ -38,3 +38,9 @@ export type SidebarCaseItem = {
   title: string
   slug: string
 }
+
+export type CaseStudySitemapItem = {
+  slug: string
+  publishedAt?: string
+  _updatedAt?: string
+}

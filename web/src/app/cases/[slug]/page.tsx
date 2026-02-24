@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 
 import { PortableTextRenderer } from "@/components/portable-text"
 import { formatPublishedDate } from "@/lib/date"
+import { buildMetadata } from "@/lib/seo"
 import { sanityClient } from "@/lib/sanity/client"
 import { caseStudyBySlugQuery, caseStudySlugsQuery } from "@/lib/sanity/queries"
 import type { CaseStudy } from "@/lib/sanity/types"
@@ -38,15 +39,20 @@ export async function generateMetadata({
   const item = await getCaseStudy(slug)
 
   if (!item) {
-    return {
+    return buildMetadata({
       title: "Not found",
-    }
+      path: `/cases/${slug}`,
+      noindex: true,
+    })
   }
 
-  return {
+  return buildMetadata({
     title: item.title,
     description: item.excerpt || item.title,
-  }
+    path: `/cases/${item.slug ?? slug}`,
+    image: item.coverImage?.asset?.url,
+    type: "article",
+  })
 }
 
 export default async function CaseStudyPage({

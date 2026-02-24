@@ -3,8 +3,23 @@ import type { Metadata } from "next"
 export const SITE_BRAND = "Андрей Заречнев - Product Designer"
 export const SITE_DEFAULT_TITLE = "Андрей Заречнев - Product Designer"
 export const SITE_DESCRIPTION = "Усиливаю системную роль дизайна в продукте"
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://zarechnev.space").replace(/\/$/, "")
 export const DEFAULT_OG_IMAGE_PATH = "/og/default.png"
+
+function resolveSiteUrl() {
+  const fallback = "https://zarechnev.space"
+  const rawValue = (process.env.NEXT_PUBLIC_SITE_URL ?? fallback).trim()
+  const withProtocol = /^https?:\/\//i.test(rawValue) ? rawValue : `https://${rawValue}`
+
+  try {
+    return new URL(withProtocol).origin
+  } catch {
+    throw new Error(
+      `Invalid NEXT_PUBLIC_SITE_URL="${rawValue}". Use domain with protocol, e.g. https://zarechnev.space`
+    )
+  }
+}
+
+export const SITE_URL = resolveSiteUrl()
 
 export function absoluteUrl(path: string = "/") {
   if (path.startsWith("http://") || path.startsWith("https://")) {

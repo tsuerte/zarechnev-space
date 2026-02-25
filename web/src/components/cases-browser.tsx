@@ -1,12 +1,22 @@
 "use client"
 
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo } from "react"
 
 import { formatPublishedDate } from "@/lib/date"
 import type { CaseCategory, CaseStudyListItem } from "@/lib/sanity/types"
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui-kit"
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/ui-kit"
 
 type CasesBrowserProps = {
   caseStudies: CaseStudyListItem[]
@@ -20,8 +30,11 @@ function normalizeCategoryParam(raw: string | null): string | null {
 }
 
 export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
+  const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const activeCategory = normalizeCategoryParam(searchParams.get("category"))
+  const activeFilterValue = activeCategory ?? "all"
 
   const filteredCaseStudies = useMemo(() => {
     if (!activeCategory) return caseStudies
@@ -31,33 +44,38 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
     )
   }, [activeCategory, caseStudies])
 
+  const filterItems = useMemo(
+    () => categories.filter((item) => item.slug),
+    [categories]
+  )
+
+  function handleCategoryChange(nextValue: string) {
+    const nextParams = new URLSearchParams(searchParams.toString())
+
+    if (nextValue === "all") {
+      nextParams.delete("category")
+    } else {
+      nextParams.set("category", nextValue)
+    }
+
+    const query = nextParams.toString()
+    router.push(query ? `${pathname}?${query}` : pathname)
+  }
+
   return (
     <>
-      <section className="mb-5 flex flex-wrap gap-2">
-        <Button
-          asChild
-          size="sm"
-          variant={activeCategory ? "outline" : "default"}
-          className="rounded-full"
-        >
-          <Link href="/cases">Все</Link>
-        </Button>
+      <section className="mb-5">
+        <Tabs value={activeFilterValue} onValueChange={handleCategoryChange}>
+          <TabsList>
+            <TabsTrigger value="all">Все</TabsTrigger>
 
-        {categories
-          .filter((item) => item.slug)
-          .map((item) => (
-            <Button
-              key={item.slug}
-              asChild
-              size="sm"
-              variant={activeCategory === item.slug ? "default" : "outline"}
-              className="rounded-full"
-            >
-              <Link href={`/cases?category=${encodeURIComponent(item.slug || "")}`}>
+            {filterItems.map((item) => (
+              <TabsTrigger key={item.slug} value={item.slug || ""}>
                 {item.title}
-              </Link>
-            </Button>
-          ))}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </section>
 
       {filteredCaseStudies.length === 0 ? (
@@ -65,10 +83,10 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
           Для этой категории пока нет опубликованных кейсов.
         </p>
       ) : (
-        <ul className="grid gap-5">
+        <ul className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
           {filteredCaseStudies.map((item) => (
-            <li key={item._id}>
-              <Card>
+            <li key={item._id} className="h-full">
+              <Card className="h-full">
                 <CardHeader className="gap-1.5">
                   <CardTitle className="text-xl">
                     {item.slug ? (

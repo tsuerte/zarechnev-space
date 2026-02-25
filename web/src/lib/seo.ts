@@ -51,8 +51,7 @@ export function buildMetadata({
   const imageUrl = absoluteUrl(image)
   const socialTitle = title ?? SITE_DEFAULT_TITLE
 
-  return {
-    title,
+  const metadata: Metadata = {
     description,
     alternates: {
       canonical,
@@ -86,4 +85,10 @@ export function buildMetadata({
       images: [imageUrl],
     },
   }
+
+  if (title) {
+    metadata.title = title
+  }
+
+  return metadata
 }

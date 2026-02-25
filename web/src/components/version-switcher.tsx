@@ -47,7 +47,7 @@ export function VersionSwitcher({
               />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
-              <span className="font-medium">Documentation</span>
+              <span className="font-normal">Documentation</span>
               <span>v{defaultVersion}</span>
             </div>
             <IconPlaceholder
@@ -84,7 +84,7 @@ export function VersionSwitcher({
                 />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium">Documentation</span>
+                <span className="font-normal">Documentation</span>
                 <span className="">v{selectedVersion}</span>
               </div>
               <IconPlaceholder

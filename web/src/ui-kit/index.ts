@@ -1,5 +1,5 @@
-export { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-export { Badge, badgeVariants } from "@/components/ui/badge"
+export { Alert, AlertDescription, AlertTitle } from "@/ui-kit/alert"
+export { Badge, badgeVariants } from "@/ui-kit/badge"
 export {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -9,7 +9,7 @@ export {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-export { Button, buttonVariants } from "@/components/ui/button"
+export { Button, buttonVariants } from "@/ui-kit/button"
 export {
   Card,
   CardAction,
@@ -18,7 +18,7 @@ export {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/ui-kit/card"
 export {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -35,9 +35,9 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-export { Input } from "@/components/ui/input"
-export { Label } from "@/components/ui/label"
+} from "@/ui-kit/dropdown-menu"
+export { Input } from "@/ui-kit/input"
+export { Label } from "@/ui-kit/label"
 export { Separator } from "@/ui-kit/separator"
 export {
   Sheet,
@@ -48,7 +48,7 @@ export {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/ui-kit/sheet"
 export {
   Sidebar,
   SidebarContent,
@@ -73,8 +73,9 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/ui-kit/sidebar"
 export { Skeleton } from "@/components/ui/skeleton"
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui-kit/tabs"
 export {
   Table,
   TableBody,
@@ -83,7 +84,7 @@ export {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/ui-kit/table"
 export {
   Tooltip,
   TooltipContent,

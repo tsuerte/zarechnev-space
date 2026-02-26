@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo } from "react"
@@ -7,6 +8,7 @@ import { useMemo } from "react"
 import { formatPublishedDate } from "@/lib/date"
 import type { CaseCategory, CaseStudyListItem } from "@/lib/sanity/types"
 import {
+  AspectRatio,
   Badge,
   Card,
   CardContent,
@@ -86,7 +88,29 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
         <ul className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
           {filteredCaseStudies.map((item) => (
             <li key={item._id} className="h-full">
-              <Card className="h-full">
+              <Card
+                className={`h-full ${item.coverImage?.asset?.url && item.coverImage?.alt ? "pt-0" : ""}`}
+              >
+                {item.coverImage?.asset?.url && item.coverImage?.alt ? (
+                  <AspectRatio
+                    ratio={
+                      (item.coverImage.asset.metadata?.dimensions?.width ?? 1200) /
+                      (item.coverImage.asset.metadata?.dimensions?.height ?? 675)
+                    }
+                    className="rounded-t-xl border-b bg-muted"
+                  >
+                    <Image
+                      src={item.coverImage.asset.url}
+                      alt={item.coverImage.alt}
+                      fill
+                      className="h-full w-full object-cover"
+                      placeholder={item.coverImage.asset.metadata?.lqip ? "blur" : "empty"}
+                      blurDataURL={item.coverImage.asset.metadata?.lqip}
+                      sizes="(min-width: 1536px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    />
+                  </AspectRatio>
+                ) : null}
+
                 <CardHeader className="gap-1.5">
                   <CardTitle className="text-xl">
                     {item.slug ? (

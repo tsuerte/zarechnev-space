@@ -8,6 +8,17 @@ export const caseStudiesListQuery = groq`*[
   "slug": slug.current,
   excerpt,
   publishedAt,
+  coverImage {
+    alt,
+    caption,
+    asset->{
+      url,
+      metadata {
+        lqip,
+        dimensions {width, height}
+      }
+    }
+  },
   "categories": categories[]->{
     title,
     "slug": slug.current

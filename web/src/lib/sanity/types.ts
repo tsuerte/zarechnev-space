@@ -27,6 +27,7 @@ export type CaseStudyListItem = {
   excerpt?: string
   publishedAt?: string
   categories?: CaseCategory[]
+  coverImage?: SanityImage
 }
 
 export type CaseStudy = CaseStudyListItem & {

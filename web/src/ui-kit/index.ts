@@ -1,4 +1,5 @@
 export { Alert, AlertDescription, AlertTitle } from "@/ui-kit/alert"
+export { AspectRatio } from "@/ui-kit/aspect-ratio"
 export { Badge, badgeVariants } from "@/ui-kit/badge"
 export {
   Breadcrumb,

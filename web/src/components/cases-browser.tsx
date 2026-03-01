@@ -67,7 +67,7 @@ export function CasesBrowser({ caseStudies, categories }: CasesBrowserProps) {
   return (
     <>
       <section className="mb-5">
-        <Tabs value={activeFilterValue} onValueChange={handleCategoryChange}>
+        <Tabs size="md" value={activeFilterValue} onValueChange={handleCategoryChange}>
           <TabsList>
             <TabsTrigger value="all">Все</TabsTrigger>
 

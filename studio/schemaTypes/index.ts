@@ -6,6 +6,7 @@ import {contentImageType} from './contentImageType'
 import {dividerType} from './dividerType'
 import {simpleTableType} from './simpleTableType'
 import {tableRowType} from './tableRowType'
+import {avatarType} from './avatarType'
 
 export const schemaTypes = [
   caseStudyType,
@@ -16,4 +17,5 @@ export const schemaTypes = [
   dividerType,
   simpleTableType,
   tableRowType,
+  avatarType,
 ]

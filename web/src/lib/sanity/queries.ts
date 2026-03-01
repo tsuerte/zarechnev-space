@@ -91,3 +91,52 @@ export const categoriesQuery = groq`*[_type == "category"] | order(title asc) {
   title,
   "slug": slug.current
 }`
+
+export const avatarsListQuery = groq`*[
+  _type == "avatar" &&
+  defined(image.asset)
+] | order(_createdAt desc) {
+  _id,
+  _createdAt,
+  _updatedAt,
+  alt,
+  kind,
+  gender,
+  sourceType,
+  sourceUrl,
+  image {
+    asset->{
+      url,
+      metadata {
+        lqip,
+        dimensions {width, height}
+      }
+    }
+  }
+}`
+
+export const avatarsByFiltersQuery = groq`*[
+  _type == "avatar" &&
+  defined(image.asset) &&
+  (!defined($kind) || kind == $kind) &&
+  (!defined($gender) || gender == $gender) &&
+  (!defined($sourceType) || sourceType == $sourceType)
+] | order(_createdAt desc) {
+  _id,
+  _createdAt,
+  _updatedAt,
+  alt,
+  kind,
+  gender,
+  sourceType,
+  sourceUrl,
+  image {
+    asset->{
+      url,
+      metadata {
+        lqip,
+        dimensions {width, height}
+      }
+    }
+  }
+}`

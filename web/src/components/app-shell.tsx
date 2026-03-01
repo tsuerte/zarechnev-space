@@ -27,6 +27,7 @@ type Crumb = {
 const segmentLabels: Record<string, string> = {
   cases: "Кейсы",
   lab: "Мастерская",
+  avatars: "Avatars",
   zalivator: "Zalivator",
 }
 

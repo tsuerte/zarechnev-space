@@ -1,6 +1,6 @@
-import type {Metadata} from 'next'
+import type { Metadata } from "next"
 import { unstable_cache } from 'next/cache'
-import {Golos_Text} from 'next/font/google'
+import { Inter } from "next/font/google"
 import Script from 'next/script'
 import { AppShell } from '@/components/app-shell'
 import {
@@ -17,9 +17,9 @@ import type { SidebarCaseItem } from '@/lib/sanity/types'
 import { TooltipProvider } from '@/ui-kit'
 import './globals.css'
 
-const golosText = Golos_Text({
-  variable: '--font-golos-text',
-  subsets: ['latin', 'cyrillic'],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
@@ -74,7 +74,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ru">
-      <body className={golosText.variable}>
+      <body className={inter.variable}>
         <TooltipProvider>
           <AppShell sidebarCaseItems={sidebarCaseItems}>{children}</AppShell>
         </TooltipProvider>

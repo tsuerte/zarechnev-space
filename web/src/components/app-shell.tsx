@@ -26,6 +26,8 @@ type Crumb = {
 
 const segmentLabels: Record<string, string> = {
   cases: "Кейсы",
+  lab: "Мастерская",
+  zalivator: "Zalivator",
 }
 
 function humanizeSegment(segment: string) {
@@ -33,14 +35,6 @@ function humanizeSegment(segment: string) {
     segmentLabels[segment] ??
     decodeURIComponent(segment).replace(/-/g, " ")
   )
-}
-
-function resolveSectionLabel(pathname: string) {
-  if (pathname === "/" || pathname.startsWith("/cases")) {
-    return "Getting Started"
-  }
-
-  return "Build Your Application"
 }
 
 function resolveCrumbLabel(
@@ -58,28 +52,17 @@ function resolveCrumbLabel(
 }
 
 function buildCrumbs(pathname: string, caseTitleBySlug: Map<string, string>): Crumb[] {
-  const sectionCrumb: Crumb = {
-    key: "section",
-    href: "/",
-    label: resolveSectionLabel(pathname),
-  }
-
   const parts = pathname.split("/").filter(Boolean)
 
   if (parts.length === 0) {
-    return [
-      sectionCrumb,
-      { key: "current-home", href: "/", label: "Главная" },
-    ]
+    return [{ key: "current-home", href: "/", label: "Главная" }]
   }
 
-  const pathCrumbs = parts.map((part, index) => ({
+  return parts.map((part, index) => ({
     key: `path-${index}`,
     href: `/${parts.slice(0, index + 1).join("/")}`,
     label: resolveCrumbLabel(parts, index, part, caseTitleBySlug),
   }))
-
-  return [sectionCrumb, ...pathCrumbs]
 }
 
 type AppShellProps = {

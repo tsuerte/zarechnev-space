@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronRight, Command, FolderOpen } from "lucide-react"
+import { ChevronRight, Command, FlaskConical, FolderOpen } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -49,16 +49,13 @@ const data: { navMain: NavSection[] } = {
       ],
     },
     {
-      title: "Build Your Application",
+      title: "Мастерская",
       url: "#",
       items: [
         {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
+          title: "Zalivator",
+          url: "/lab/zalivator",
+          icon: FlaskConical,
         },
       ],
     },

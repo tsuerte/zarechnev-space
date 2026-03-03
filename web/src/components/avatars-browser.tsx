@@ -62,7 +62,7 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
   }, [items, kind, gender, sourceType])
 
   return (
-    <section className="mx-auto w-full max-w-6xl space-y-6">
+    <section className="w-full space-y-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Avatars</h1>
         <p className="text-muted-foreground text-base">
@@ -114,14 +114,14 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
           По текущим фильтрам ничего не найдено.
         </p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
           {filtered.map((item) => {
             const imageUrl = item.image?.asset?.url
             const source = sourceLabel[item.sourceType]
 
             return (
-              <li key={item._id}>
-                <Card className="h-full overflow-hidden pt-0">
+              <li key={item._id} className="w-full">
+                <Card className="h-full max-w-[200px] overflow-hidden pt-0">
                   <div className="bg-muted relative aspect-square w-full">
                     {imageUrl ? (
                       <Image
@@ -131,7 +131,7 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
                         className="object-cover"
                         placeholder={item.image?.asset?.metadata?.lqip ? "blur" : "empty"}
                         blurDataURL={item.image?.asset?.metadata?.lqip}
-                        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        sizes="(max-width: 639px) 45vw, 200px"
                       />
                     ) : null}
                   </div>

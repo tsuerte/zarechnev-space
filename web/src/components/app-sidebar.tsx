@@ -58,6 +58,11 @@ const data: { navMain: NavSection[] } = {
           icon: FlaskConical,
         },
         {
+          title: "SVG",
+          url: "/lab/svg",
+          icon: FlaskConical,
+        },
+        {
           title: "Zalivator",
           url: "/lab/zalivator",
           icon: FlaskConical,

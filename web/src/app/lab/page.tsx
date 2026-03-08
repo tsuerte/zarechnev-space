@@ -23,6 +23,20 @@ export default function LabPage() {
         <Card>
           <CardHeader>
             <CardTitle>
+              <Link href="/lab/svg" className="hover:underline">
+                SVG
+              </Link>
+            </CardTitle>
+            <CardDescription>Инструмент для очистки и сжатия SVG.</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            Загрузите файл или вставьте SVG из буфера.
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
               <Link href="/lab/zalivator" className="hover:underline">
                 Zalivator
               </Link>

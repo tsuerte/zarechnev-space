@@ -76,8 +76,16 @@ function TabsTrigger({
   )
 }
 
-function TabsContent(props: React.ComponentProps<typeof BaseTabsContent>) {
-  return <BaseTabsContent {...props} />
+function TabsContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseTabsContent>) {
+  return (
+    <BaseTabsContent
+      className={cn("data-[state=inactive]:hidden", className)}
+      {...props}
+    />
+  )
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent }

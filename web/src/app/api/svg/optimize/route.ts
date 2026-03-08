@@ -2,8 +2,7 @@ import { NextResponse } from "next/server"
 
 import { consumeRateLimit, getRateLimitKey } from "@/lib/server/rate-limit"
 import { optimizeSvg } from "@/lib/svg/optimize"
-
-const MAX_SVG_FILE_SIZE = 5 * 1024 * 1024
+import { getSvgUploadError } from "@/lib/svg/upload"
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX_REQUESTS = 20
 
@@ -34,18 +33,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "SVG файл не передан." }, { status: 400 })
     }
 
-    const looksLikeSvgFile = file.name.toLowerCase().endsWith(".svg")
-    const hasSvgMimeType = file.type === "" || file.type.startsWith("image/svg+xml")
-
-    if (!looksLikeSvgFile || !hasSvgMimeType) {
-      return NextResponse.json({ error: "Нужен SVG файл." }, { status: 400 })
-    }
-
-    if (file.size > MAX_SVG_FILE_SIZE) {
-      return NextResponse.json(
-        { error: "SVG файл слишком большой. Лимит: 5 MB." },
-        { status: 400 }
-      )
+    const uploadError = getSvgUploadError(file)
+    if (uploadError) {
+      return NextResponse.json({ error: uploadError }, { status: 400 })
     }
 
     const svg = await file.text()

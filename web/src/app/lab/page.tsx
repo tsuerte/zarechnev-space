@@ -23,6 +23,20 @@ export default function LabPage() {
         <Card>
           <CardHeader>
             <CardTitle>
+              <Link href="/lab/icons" className="hover:underline">
+                Icons
+              </Link>
+            </CardTitle>
+            <CardDescription>Каталог SVG-иконок для интерфейсов.</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            UI-shell каталога с постоянной detail-panel.
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
               <Link href="/lab/svg" className="hover:underline">
                 SVG
               </Link>

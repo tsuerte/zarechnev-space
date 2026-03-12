@@ -27,7 +27,8 @@ type Crumb = {
 const segmentLabels: Record<string, string> = {
   cases: "Кейсы",
   lab: "Мастерская",
-  avatars: "Avatars",
+  avatars: "Аватары",
+  icons: "Иконки",
   svg: "SVG",
   zalivator: "Zalivator",
 }
@@ -74,7 +75,7 @@ type AppShellProps = {
 
 export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
   const pathname = usePathname()
-  const isZalivatorPage = pathname === "/lab/zalivator"
+  const isFramelessPage = pathname === "/lab/zalivator" || pathname === "/lab/icons"
   const caseTitleBySlug = useMemo(
     () => new Map(sidebarCaseItems.map((caseItem) => [caseItem.slug, caseItem.title])),
     [sidebarCaseItems]
@@ -117,7 +118,7 @@ export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className={`flex min-h-0 flex-1 flex-col ${isZalivatorPage ? "" : "p-4 md:p-6"}`}>
+        <div className={`flex min-h-0 flex-1 flex-col ${isFramelessPage ? "" : "p-4 md:p-6"}`}>
           {children}
         </div>
       </div>

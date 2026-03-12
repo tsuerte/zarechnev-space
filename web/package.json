@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test",
+    "icons:sync": "tsx scripts/icons-sync.ts",
     "seo:check": "node scripts/check-page-metadata.mjs",
     "check": "npm run seo:check && npm run lint && npm run build"
   },
@@ -34,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

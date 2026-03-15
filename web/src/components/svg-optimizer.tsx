@@ -13,7 +13,7 @@ import { SvgOptimizerSingle } from "@/components/svg-optimizer-single"
 export function SvgOptimizer() {
   return (
     <section className="mx-auto min-w-0 w-full max-w-6xl space-y-4">
-      <Tabs defaultValue="single" size="md" className="space-y-4">
+      <Tabs defaultValue="single" className="space-y-4">
         <TabsList>
           <TabsTrigger value="single">Один файл</TabsTrigger>
           <TabsTrigger value="batch">Пакет</TabsTrigger>

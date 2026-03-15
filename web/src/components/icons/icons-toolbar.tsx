@@ -33,7 +33,6 @@ export function IconsToolbar({
           />
         </div>
         <Tabs
-          size="sm"
           value={String(previewSize)}
           onValueChange={(value) => {
             const nextValue = Number(value)

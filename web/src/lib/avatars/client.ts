@@ -39,8 +39,8 @@ function inferExtension(url: string, blob: Blob) {
 
 function createFileName(item: AvatarListItem, extension: string, index: number) {
   const source = sanitizeFileNameSegment(item.sourceType)
-  const kind = sanitizeFileNameSegment(item.kind)
-  const alt = sanitizeFileNameSegment(item.alt || `${kind}-${index + 1}`)
+  const gender = sanitizeFileNameSegment(item.gender)
+  const alt = sanitizeFileNameSegment(item.alt || `${gender}-${index + 1}`)
 
   return `${alt}-${source}.${extension}`
 }

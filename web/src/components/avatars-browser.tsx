@@ -7,7 +7,6 @@ import { Download } from "lucide-react"
 import { downloadAvatarsZip } from "@/lib/avatars/client"
 import type {
   AvatarGender,
-  AvatarKind,
   AvatarListItem,
   AvatarSourceType,
 } from "@/lib/sanity/types"
@@ -24,7 +23,6 @@ type AvatarsBrowserProps = {
   items: AvatarListItem[]
 }
 
-type KindFilter = "all" | AvatarKind
 type GenderFilter = "all" | AvatarGender
 type SourceFilter = "all" | AvatarSourceType
 type PreviewMode = "rounded" | "square" | "circle"
@@ -36,7 +34,6 @@ const previewModeClassName: Record<PreviewMode, string> = {
 }
 
 export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
-  const [kind, setKind] = useState<KindFilter>("all")
   const [gender, setGender] = useState<GenderFilter>("all")
   const [sourceType, setSourceType] = useState<SourceFilter>("all")
   const [previewMode, setPreviewMode] = useState<PreviewMode>("rounded")
@@ -45,11 +42,7 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
-      if (kind !== "all" && item.kind !== kind) {
-        return false
-      }
-
-      if (kind === "human" && gender !== "all" && item.gender !== gender) {
+      if (gender !== "all" && item.gender !== gender) {
         return false
       }
 
@@ -59,7 +52,7 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
 
       return true
     })
-  }, [items, kind, gender, sourceType])
+  }, [items, gender, sourceType])
 
   async function handleZipDownload() {
     try {
@@ -85,39 +78,23 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
       <section>
         <div className="flex flex-wrap items-center gap-3">
           <Tabs
-            size="md"
             value={sourceType}
             onValueChange={(value) => setSourceType(value as SourceFilter)}
           >
             <TabsList>
               <TabsTrigger value="all">Источник: любой</TabsTrigger>
-              <TabsTrigger value="self">Сам</TabsTrigger>
               <TabsTrigger value="freepik_ai">Freepik</TabsTrigger>
               <TabsTrigger value="unsplash">Unsplash</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <Tabs size="md" value={kind} onValueChange={(value) => setKind(value as KindFilter)}>
+          <Tabs value={gender} onValueChange={(value) => setGender(value as GenderFilter)}>
             <TabsList>
-              <TabsTrigger value="all">Все</TabsTrigger>
-              <TabsTrigger value="human">Человек</TabsTrigger>
-              <TabsTrigger value="object">Объект</TabsTrigger>
+              <TabsTrigger value="all">Любой</TabsTrigger>
+              <TabsTrigger value="male">Муж</TabsTrigger>
+              <TabsTrigger value="female">Жен</TabsTrigger>
             </TabsList>
           </Tabs>
-
-          {kind === "human" ? (
-            <Tabs
-              size="md"
-              value={gender}
-              onValueChange={(value) => setGender(value as GenderFilter)}
-            >
-              <TabsList>
-                <TabsTrigger value="all">Пол: любой</TabsTrigger>
-                <TabsTrigger value="male">М</TabsTrigger>
-                <TabsTrigger value="female">Ж</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          ) : null}
 
           <div className="ml-auto flex items-center gap-2">
             <ToggleGroup

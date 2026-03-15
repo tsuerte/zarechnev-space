@@ -51,7 +51,7 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.45rem;
   --shadow-tabs-active: 0 1px 1px 0 rgba(0, 0, 0, 0.18);
   --surface-soft: #f1f1f1;
   --surface-soft-hover: #e5e5e5;
@@ -105,9 +105,6 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  a {
-    @apply text-foreground;
-  }
   html {
     @apply font-sans;
   }

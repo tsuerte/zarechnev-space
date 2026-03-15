@@ -46,19 +46,16 @@ export type CaseStudySitemapItem = {
   _updatedAt?: string
 }
 
-export type AvatarKind = 'human' | 'object'
-
 export type AvatarGender = 'male' | 'female'
 
-export type AvatarSourceType = 'self' | 'freepik_ai' | 'unsplash'
+export type AvatarSourceType = 'freepik_ai' | 'unsplash'
 
 export type AvatarListItem = {
   _id: string
   _createdAt: string
   _updatedAt: string
   alt: string
-  kind: AvatarKind
-  gender?: AvatarGender
+  gender: AvatarGender
   sourceType: AvatarSourceType
   sourceUrl?: string
   image?: {

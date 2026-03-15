@@ -2,7 +2,9 @@
 
 import Image from "next/image"
 import { useMemo, useState } from "react"
+import { Download } from "lucide-react"
 
+import { downloadAvatarsZip } from "@/lib/avatars/client"
 import type {
   AvatarGender,
   AvatarKind,
@@ -10,13 +12,12 @@ import type {
   AvatarSourceType,
 } from "@/lib/sanity/types"
 import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
+  Button,
   Tabs,
   TabsList,
   TabsTrigger,
+  ToggleGroup,
+  ToggleGroupItem,
 } from "@/ui-kit"
 
 type AvatarsBrowserProps = {
@@ -26,22 +27,21 @@ type AvatarsBrowserProps = {
 type KindFilter = "all" | AvatarKind
 type GenderFilter = "all" | AvatarGender
 type SourceFilter = "all" | AvatarSourceType
+type PreviewMode = "rounded" | "square" | "circle"
 
-const sourceLabel: Record<AvatarSourceType, string> = {
-  self: "Сам",
-  freepik_ai: "Freepik",
-  unsplash: "Unsplash",
-}
-
-const genderLabel: Record<AvatarGender, string> = {
-  male: "М",
-  female: "Ж",
+const previewModeClassName: Record<PreviewMode, string> = {
+  rounded: "rounded-2xl",
+  square: "rounded-none",
+  circle: "rounded-full",
 }
 
 export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
   const [kind, setKind] = useState<KindFilter>("all")
   const [gender, setGender] = useState<GenderFilter>("all")
   const [sourceType, setSourceType] = useState<SourceFilter>("all")
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("rounded")
+  const [isZipLoading, setIsZipLoading] = useState(false)
+  const [feedback, setFeedback] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
@@ -60,6 +60,18 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
       return true
     })
   }, [items, kind, gender, sourceType])
+
+  async function handleZipDownload() {
+    try {
+      setIsZipLoading(true)
+      const result = await downloadAvatarsZip(filtered)
+      setFeedback(`Скачан ZIP: ${result.count} шт.`)
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Не удалось скачать ZIP.")
+    } finally {
+      setIsZipLoading(false)
+    }
+  }
 
   return (
     <section className="w-full space-y-6">
@@ -106,7 +118,38 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
               </TabsList>
             </Tabs>
           ) : null}
+
+          <div className="ml-auto flex items-center gap-2">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={previewMode}
+              onValueChange={(value) => {
+                if (value === "rounded" || value === "square" || value === "circle") {
+                  setPreviewMode(value)
+                }
+              }}
+              aria-label="Use case preview"
+            >
+              <ToggleGroupItem value="rounded" aria-label="Скругленные углы">
+                Скругленные
+              </ToggleGroupItem>
+              <ToggleGroupItem value="square" aria-label="Прямоугольник">
+                Квадратные
+              </ToggleGroupItem>
+              <ToggleGroupItem value="circle" aria-label="Круг">
+                Круглые
+              </ToggleGroupItem>
+            </ToggleGroup>
+
+            <Button type="button" variant="outline" onClick={handleZipDownload} disabled={isZipLoading}>
+              <Download className="size-4" />
+              {isZipLoading ? "Собираем ZIP..." : "Скачать ZIP"}
+            </Button>
+          </div>
         </div>
+
+        {feedback ? <p className="mt-3 text-sm text-muted-foreground">{feedback}</p> : null}
       </section>
 
       {filtered.length === 0 ? (
@@ -114,49 +157,38 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
           По текущим фильтрам ничего не найдено.
         </p>
       ) : (
-        <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
+        <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(148px,1fr))]">
           {filtered.map((item) => {
             const imageUrl = item.image?.asset?.url
-            const source = sourceLabel[item.sourceType]
 
             return (
               <li key={item._id} className="w-full">
-                <Card className="h-full max-w-[200px] overflow-hidden pt-0">
-                  <div className="bg-muted relative aspect-square w-full">
+                <div className="relative block w-full">
+                  <div
+                    className={[
+                      "relative aspect-square w-full overflow-hidden",
+                      previewModeClassName[previewMode],
+                    ].join(" ")}
+                  >
                     {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={item.alt}
-                        fill
-                        className="object-cover"
-                        placeholder={item.image?.asset?.metadata?.lqip ? "blur" : "empty"}
-                        blurDataURL={item.image?.asset?.metadata?.lqip}
-                        sizes="(max-width: 639px) 45vw, 200px"
-                      />
-                    ) : null}
+                      <>
+                        <Image
+                          src={imageUrl}
+                          alt={item.alt}
+                          fill
+                          className="object-cover"
+                          placeholder={item.image?.asset?.metadata?.lqip ? "blur" : "empty"}
+                          blurDataURL={item.image?.asset?.metadata?.lqip}
+                          sizes="(max-width: 639px) 45vw, 180px"
+                        />
+                      </>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+                        Нет изображения
+                      </div>
+                    )}
                   </div>
-                  <CardHeader className="space-y-1.5">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">{item.kind === "human" ? "Человек" : "Объект"}</Badge>
-                      {item.kind === "human" && item.gender ? (
-                        <Badge variant="outline">{genderLabel[item.gender]}</Badge>
-                      ) : null}
-                      <Badge variant="outline">{source}</Badge>
-                    </div>
-                  </CardHeader>
-                  {item.sourceType === "unsplash" && item.sourceUrl ? (
-                    <CardContent>
-                      <a
-                        href={item.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm underline underline-offset-4"
-                      >
-                        Источник (Unsplash)
-                      </a>
-                    </CardContent>
-                  ) : null}
-                </Card>
+                </div>
               </li>
             )
           })}

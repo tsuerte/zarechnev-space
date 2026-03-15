@@ -4,7 +4,7 @@ import Image from "next/image"
 
 import type { IconFamilySummary } from "@/lib/icons/types"
 import { cn } from "@/lib/utils"
-import { Badge, Button } from "@/ui-kit"
+import { Badge } from "@/ui-kit"
 
 function svgToDataUrl(svg: string) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
@@ -21,12 +21,12 @@ export function IconCard({ icon, isSelected, onSelect, previewSize }: IconCardPr
   const stageSize = Math.max(previewSize, 48)
 
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
       onClick={() => onSelect(icon.id)}
       className={cn(
         "h-auto min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border border-transparent bg-transparent px-3 py-4 text-center hover:bg-surface-soft",
+        "inline-flex outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         isSelected && "bg-surface-soft"
       )}
     >
@@ -49,6 +49,6 @@ export function IconCard({ icon, isSelected, onSelect, previewSize }: IconCardPr
           <Badge variant="secondary">Sync error</Badge>
         ) : null}
       </div>
-    </Button>
+    </button>
   )
 }

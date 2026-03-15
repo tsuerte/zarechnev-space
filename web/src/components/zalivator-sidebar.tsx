@@ -15,15 +15,12 @@ export function ZalivatorSidebar() {
         <SidebarGroupContent>
           <SidebarMenu className="gap-1">
             <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive
-                className="hover:bg-surface-soft data-[active=true]:bg-surface-soft data-[active=true]:hover:bg-surface-soft"
-              >
+              <SidebarMenuButton isActive appearance="surface">
                 <span>Single</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="hover:bg-surface-soft">
+              <SidebarMenuButton appearance="surface">
                 <span>Batch</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

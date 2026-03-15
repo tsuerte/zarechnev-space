@@ -15,8 +15,8 @@ export type TabsSize = "sm" | "md"
 const TabsSizeContext = React.createContext<TabsSize>("md")
 
 const tabsListSizeClasses: Record<TabsSize, string> = {
-  sm: "h-8 p-1 rounded-md",
-  md: "h-10 p-1 rounded-md",
+  sm: "group-data-horizontal/tabs:h-8 p-1 rounded-md",
+  md: "group-data-horizontal/tabs:h-10 p-1 rounded-md",
 }
 
 const tabsTriggerSizeClasses: Record<TabsSize, string> = {

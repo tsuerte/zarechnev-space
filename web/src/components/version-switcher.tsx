@@ -31,11 +31,7 @@ export function VersionSwitcher({
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            disabled
-            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-          >
+          <SidebarMenuButton size="lg" disabled>
             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
               <IconPlaceholder
                 lucide="GalleryVerticalEndIcon"
@@ -66,16 +62,13 @@ export function VersionSwitcher({
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <IconPlaceholder
-                  lucide="GalleryVerticalEndIcon"
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton size="lg" openTone="accent">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <IconPlaceholder
+                    lucide="GalleryVerticalEndIcon"
                   tabler="IconLayoutRows"
                   hugeicons="LayoutBottomIcon"
                   phosphor="RowsIcon"

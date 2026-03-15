@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { unstable_cache } from 'next/cache'
-import { Inter } from "next/font/google"
+import { Inter, Geist } from "next/font/google"
 import Script from 'next/script'
 import { AppShell } from '@/components/app-shell'
 import {
@@ -16,6 +16,9 @@ import { sanityClient } from '@/lib/sanity/client'
 import type { SidebarCaseItem } from '@/lib/sanity/types'
 import { TooltipProvider } from '@/ui-kit'
 import './globals.css'
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -73,7 +76,7 @@ export default async function RootLayout({
   const sidebarCaseItems = await getSidebarCaseItems()
 
   return (
-    <html lang="ru">
+    <html lang="ru" className={cn("font-sans", geist.variable)}>
       <body className={inter.variable}>
         <TooltipProvider>
           <AppShell sidebarCaseItems={sidebarCaseItems}>{children}</AppShell>

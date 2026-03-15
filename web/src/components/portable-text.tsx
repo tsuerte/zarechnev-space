@@ -6,12 +6,10 @@ import {
   type PortableTextComponents,
 } from "@portabletext/react"
 
-import { cn } from "@/lib/utils"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-  Separator,
   Table,
   TableBody,
   TableCaption,
@@ -65,12 +63,6 @@ type CodeBlockValue = {
   filename?: string
   language?: string
   code?: string
-}
-
-const calloutToneStyles: Record<NonNullable<CalloutValue["tone"]>, string> = {
-  info: "border-blue-200 bg-blue-50 text-blue-950",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-950",
-  warning: "border-amber-200 bg-amber-50 text-amber-950",
 }
 
 const components: PortableTextComponents = {
@@ -168,7 +160,7 @@ const components: PortableTextComponents = {
         return <div className="my-7 h-7" aria-hidden="true" />
       }
 
-      return <Separator className="my-7 bg-muted-foreground/25" />
+      return <hr className="my-7 border-0 border-t border-muted-foreground/25" />
     },
     simpleTable: ({ value }) => {
       const table = value as SimpleTableValue
@@ -216,11 +208,9 @@ const components: PortableTextComponents = {
       if (!callout.text) return null
 
       return (
-        <Alert className={cn("my-7", calloutToneStyles[tone])}>
+        <Alert tone={tone} className="my-7">
           {callout.title ? <AlertTitle>{callout.title}</AlertTitle> : null}
-          <AlertDescription className="text-current">
-            {callout.text}
-          </AlertDescription>
+          <AlertDescription>{callout.text}</AlertDescription>
         </Alert>
       )
     },

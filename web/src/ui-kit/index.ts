@@ -86,6 +86,7 @@ export {
   TableHeader,
   TableRow,
 } from "@/ui-kit/table"
+export { ToggleGroup, ToggleGroupItem } from "@/ui-kit/toggle-group"
 export {
   Tooltip,
   TooltipContent,

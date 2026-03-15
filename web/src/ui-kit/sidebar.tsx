@@ -29,6 +29,27 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
+type SidebarMenuButtonAppearance = "default" | "surface"
+type SidebarMenuButtonOpenTone = "default" | "accent"
+
+const sidebarMenuButtonAppearanceClasses: Record<
+  SidebarMenuButtonAppearance,
+  string
+> = {
+  default: "",
+  surface:
+    "hover:bg-surface-soft data-[active=true]:bg-surface-soft data-[active=true]:hover:bg-surface-soft",
+}
+
+const sidebarMenuButtonOpenToneClasses: Record<
+  SidebarMenuButtonOpenTone,
+  string
+> = {
+  default: "",
+  accent:
+    "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+}
+
 function Sidebar(props: React.ComponentProps<typeof BaseSidebar>) {
   return <BaseSidebar {...props} />
 }
@@ -97,12 +118,22 @@ function SidebarMenuItem(props: React.ComponentProps<typeof BaseSidebarMenuItem>
 }
 
 function SidebarMenuButton({
+  appearance = "default",
+  openTone = "default",
   className,
   ...props
-}: React.ComponentProps<typeof BaseSidebarMenuButton>) {
+}: React.ComponentProps<typeof BaseSidebarMenuButton> & {
+  appearance?: SidebarMenuButtonAppearance
+  openTone?: SidebarMenuButtonOpenTone
+}) {
   return (
     <BaseSidebarMenuButton
-      className={cn("data-[active=true]:font-normal", className)}
+      className={cn(
+        "data-[active=true]:font-normal",
+        sidebarMenuButtonAppearanceClasses[appearance],
+        sidebarMenuButtonOpenToneClasses[openTone],
+        className
+      )}
       {...props}
     />
   )

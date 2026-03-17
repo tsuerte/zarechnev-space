@@ -1,85 +1,17 @@
 "use client"
 
-import JSZip from "jszip"
-
+import { createAvatarArchiveName } from "@/lib/avatars/file-name"
 import type { AvatarListItem } from "@/lib/sanity/types"
 
-const URL_EXTENSION_RE = /\.([a-z0-9]+)(?:$|[?#])/i
-
-function getAvatarUrl(item: AvatarListItem) {
-  return item.image?.asset?.url ?? null
+function getDownloadArchiveName(response: Response, fallbackCount: number) {
+  return response.headers.get("x-archive-name") ?? createAvatarArchiveName(fallbackCount)
 }
 
-function sanitizeFileNameSegment(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-+|-+$/g, "") || "avatar"
-}
+function getDownloadCount(response: Response, fallbackCount: number) {
+  const rawCount = response.headers.get("x-avatar-count")
+  const parsedCount = rawCount ? Number.parseInt(rawCount, 10) : Number.NaN
 
-function inferExtension(url: string, blob: Blob) {
-  const urlMatch = url.match(URL_EXTENSION_RE)?.[1]?.toLowerCase()
-
-  if (urlMatch) {
-    return urlMatch
-  }
-
-  const mimeToExtension: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-    "image/avif": "avif",
-    "image/svg+xml": "svg",
-  }
-
-  return mimeToExtension[blob.type] ?? "png"
-}
-
-function createFileName(item: AvatarListItem, extension: string, index: number) {
-  const source = sanitizeFileNameSegment(item.sourceType)
-  const gender = sanitizeFileNameSegment(item.gender)
-  const alt = sanitizeFileNameSegment(item.alt || `${gender}-${index + 1}`)
-
-  return `${alt}-${source}.${extension}`
-}
-
-async function fetchAvatarAsset(item: AvatarListItem) {
-  const url = getAvatarUrl(item)
-
-  if (!url) {
-    throw new Error("У аватара нет файла изображения.")
-  }
-
-  let response: Response
-
-  try {
-    response = await fetch(url)
-  } catch {
-    const host = new URL(url).host
-
-    throw new Error(
-      `Не удалось запросить исходный файл аватара с ${host}. Похоже на блокировку прямого browser fetch (CORS).`
-    )
-  }
-
-  if (!response.ok) {
-    throw new Error(`Не удалось загрузить аватар (${response.status}).`)
-  }
-
-  let blob: Blob
-
-  try {
-    blob = await response.blob()
-  } catch {
-    throw new Error("Не удалось прочитать ответ изображения как blob.")
-  }
-
-  return {
-    url,
-    blob,
-  }
+  return Number.isFinite(parsedCount) ? parsedCount : fallbackCount
 }
 
 function downloadBlob(fileName: string, blob: Blob) {
@@ -94,37 +26,36 @@ function downloadBlob(fileName: string, blob: Blob) {
 }
 
 export async function downloadAvatarsZip(items: AvatarListItem[]) {
-  const availableItems = items.filter((item) => Boolean(getAvatarUrl(item)))
+  const avatarIds = [...new Set(items.map((item) => item._id))]
 
-  if (availableItems.length === 0) {
+  if (avatarIds.length === 0) {
     throw new Error("Нет доступных аватаров для скачивания.")
   }
 
-  const zip = new JSZip()
-
-  const results = await Promise.all(
-    availableItems.map(async (item, index) => {
-      const { url, blob } = await fetchAvatarAsset(item)
-      const extension = inferExtension(url, blob)
-      const fileName = createFileName(item, extension, index)
-
-      return {
-        blob,
-        fileName,
-      }
-    })
-  )
-
-  results.forEach((result) => {
-    zip.file(result.fileName, result.blob)
+  const response = await fetch("/api/avatars/download", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ids: avatarIds }),
   })
 
-  const archive = await zip.generateAsync({ type: "blob" })
-  const archiveName = `avatars-${results.length}.zip`
+  if (!response.ok) {
+    try {
+      const payload = (await response.json()) as { error?: string }
+      throw new Error(payload.error || "Не удалось собрать ZIP с аватарами.")
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Не удалось собрать ZIP с аватарами.")
+    }
+  }
+
+  const archive = await response.blob()
+  const archiveName = getDownloadArchiveName(response, avatarIds.length)
+  const count = getDownloadCount(response, avatarIds.length)
 
   downloadBlob(archiveName, archive)
 
   return {
-    count: results.length,
+    count,
   }
 }

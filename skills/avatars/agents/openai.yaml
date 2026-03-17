@@ -1,0 +1,4 @@
+interface:
+  display_name: "Avatars"
+  short_description: "Support for the /lab/avatars feature"
+  default_prompt: "Use $avatars to work on the /lab/avatars catalog, filters, download flow, or Sanity avatar model."

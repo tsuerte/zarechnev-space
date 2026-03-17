@@ -12,9 +12,6 @@ import type {
 } from "@/lib/sanity/types"
 import {
   Button,
-  Tabs,
-  TabsList,
-  TabsTrigger,
   ToggleGroup,
   ToggleGroupItem,
 } from "@/ui-kit"
@@ -25,18 +22,10 @@ type AvatarsBrowserProps = {
 
 type GenderFilter = "all" | AvatarGender
 type SourceFilter = "all" | AvatarSourceType
-type PreviewMode = "rounded" | "square" | "circle"
-
-const previewModeClassName: Record<PreviewMode, string> = {
-  rounded: "rounded-2xl",
-  square: "rounded-none",
-  circle: "rounded-full",
-}
 
 export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
   const [gender, setGender] = useState<GenderFilter>("all")
   const [sourceType, setSourceType] = useState<SourceFilter>("all")
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("rounded")
   const [isZipLoading, setIsZipLoading] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -56,9 +45,9 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
 
   async function handleZipDownload() {
     try {
+      setFeedback(null)
       setIsZipLoading(true)
-      const result = await downloadAvatarsZip(filtered)
-      setFeedback(`Скачан ZIP: ${result.count} шт.`)
+      await downloadAvatarsZip(items)
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Не удалось скачать ZIP.")
     } finally {
@@ -77,51 +66,54 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
 
       <section>
         <div className="flex flex-wrap items-center gap-3">
-          <Tabs
+          <ToggleGroup
+            type="single"
+            variant="outline"
             value={sourceType}
-            onValueChange={(value) => setSourceType(value as SourceFilter)}
+            onValueChange={(value) => {
+              if (value === "all" || value === "freepik_ai" || value === "unsplash") {
+                setSourceType(value)
+              }
+            }}
+            aria-label="Фильтр по источнику"
           >
-            <TabsList>
-              <TabsTrigger value="all">Источник: любой</TabsTrigger>
-              <TabsTrigger value="freepik_ai">Freepik</TabsTrigger>
-              <TabsTrigger value="unsplash">Unsplash</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            <ToggleGroupItem value="all" aria-label="Все источники">
+              Все
+            </ToggleGroupItem>
+            <ToggleGroupItem value="freepik_ai" aria-label="Freepik">
+              Freepik
+            </ToggleGroupItem>
+            <ToggleGroupItem value="unsplash" aria-label="Unsplash">
+              Unsplash
+            </ToggleGroupItem>
+          </ToggleGroup>
 
-          <Tabs value={gender} onValueChange={(value) => setGender(value as GenderFilter)}>
-            <TabsList>
-              <TabsTrigger value="all">Любой</TabsTrigger>
-              <TabsTrigger value="male">Муж</TabsTrigger>
-              <TabsTrigger value="female">Жен</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={gender}
+            onValueChange={(value) => {
+              if (value === "all" || value === "male" || value === "female") {
+                setGender(value)
+              }
+            }}
+            aria-label="Фильтр по полу"
+          >
+            <ToggleGroupItem value="all" aria-label="Все">
+              Все
+            </ToggleGroupItem>
+            <ToggleGroupItem value="male" aria-label="Мужской">
+              Муж
+            </ToggleGroupItem>
+            <ToggleGroupItem value="female" aria-label="Женский">
+              Жен
+            </ToggleGroupItem>
+          </ToggleGroup>
 
           <div className="ml-auto flex items-center gap-2">
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={previewMode}
-              onValueChange={(value) => {
-                if (value === "rounded" || value === "square" || value === "circle") {
-                  setPreviewMode(value)
-                }
-              }}
-              aria-label="Use case preview"
-            >
-              <ToggleGroupItem value="rounded" aria-label="Скругленные углы">
-                Скругленные
-              </ToggleGroupItem>
-              <ToggleGroupItem value="square" aria-label="Прямоугольник">
-                Квадратные
-              </ToggleGroupItem>
-              <ToggleGroupItem value="circle" aria-label="Круг">
-                Круглые
-              </ToggleGroupItem>
-            </ToggleGroup>
-
-            <Button type="button" variant="outline" onClick={handleZipDownload} disabled={isZipLoading}>
+            <Button type="button" onClick={handleZipDownload} disabled={isZipLoading}>
               <Download className="size-4" />
-              {isZipLoading ? "Собираем ZIP..." : "Скачать ZIP"}
+              {isZipLoading ? "Собираем ZIP..." : "Скачать всё в ZIP"}
             </Button>
           </div>
         </div>
@@ -142,10 +134,7 @@ export function AvatarsBrowser({ items }: AvatarsBrowserProps) {
               <li key={item._id} className="w-full">
                 <div className="relative block w-full">
                   <div
-                    className={[
-                      "relative aspect-square w-full overflow-hidden",
-                      previewModeClassName[previewMode],
-                    ].join(" ")}
+                    className="relative aspect-square w-full overflow-hidden rounded-full"
                   >
                     {imageUrl ? (
                       <>

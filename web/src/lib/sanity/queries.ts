@@ -97,12 +97,9 @@ export const avatarsListQuery = groq`*[
   defined(image.asset)
 ] | order(_createdAt desc) {
   _id,
-  _createdAt,
-  _updatedAt,
   alt,
   gender,
   sourceType,
-  sourceUrl,
   image {
     asset->{
       url,
@@ -110,6 +107,22 @@ export const avatarsListQuery = groq`*[
         lqip,
         dimensions {width, height}
       }
+    }
+  }
+}`
+
+export const avatarsByIdsQuery = groq`*[
+  _type == "avatar" &&
+  _id in $ids &&
+  defined(image.asset)
+] {
+  _id,
+  alt,
+  gender,
+  sourceType,
+  image {
+    asset->{
+      url
     }
   }
 }`

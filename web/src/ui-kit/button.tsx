@@ -12,13 +12,18 @@ function Button({
   className,
   ...props
 }: React.ComponentProps<typeof BaseButton>) {
-  return <BaseButton className={cn("font-normal", className)} {...props} />
+  return (
+    <BaseButton
+      className={cn("font-normal rounded-[var(--radius-md)]", className)}
+      {...props}
+    />
+  )
 }
 
 function buttonVariants(
   ...args: Parameters<typeof baseButtonVariants>
 ) {
-  return cn(baseButtonVariants(...args), "font-normal")
+  return cn(baseButtonVariants(...args), "font-normal rounded-[var(--radius-md)]")
 }
 
 export { Button, buttonVariants }

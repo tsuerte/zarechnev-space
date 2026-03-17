@@ -29,18 +29,23 @@ function extractSlug(payload?: unknown): string | undefined {
 }
 
 function runRevalidate(payload?: {_id?: string; _type?: string; slug?: unknown}) {
-  revalidatePath('/')
-  revalidatePath('/cases')
+  const paths = ['/', '/cases']
+
+  if (!payload?._type || payload._type === 'avatar') {
+    paths.push('/lab/avatars')
+  }
 
   const slug = extractSlug(payload)
   if (slug) {
-    revalidatePath(`/cases/${slug}`)
+    paths.push(`/cases/${slug}`)
   }
+
+  paths.forEach((path) => revalidatePath(path))
 
   return NextResponse.json({
     ok: true,
     revalidated: true,
-    paths: slug ? ['/', '/cases', `/cases/${slug}`] : ['/', '/cases'],
+    paths,
     documentId: payload?._id ?? null,
     documentType: payload?._type ?? null,
     now: new Date().toISOString(),

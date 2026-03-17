@@ -10,3 +10,6 @@ For this repository, the assistant must follow this process on every task:
 
 Without explicit user approval, no execution actions are allowed.
 
+## Local Skills
+
+- `avatars`: Use when a task touches `/lab/avatars`, the `avatar` Sanity model, avatar filters/UI, the avatar ZIP download flow, or avatar revalidation. Read `skills/avatars/SKILL.md` before planning or implementation. (file: `skills/avatars/SKILL.md`)

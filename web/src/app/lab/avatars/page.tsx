@@ -8,7 +8,7 @@ import type { AvatarListItem } from "@/lib/sanity/types"
 
 export const metadata = buildMetadata({
   title: "Avatars",
-  description: "Библиотека аватаров с фильтрами по типу, полу и источнику.",
+  description: "Библиотека аватаров с фильтрами по источнику и полу.",
   path: "/lab/avatars",
 })
 
@@ -29,4 +29,3 @@ export default async function AvatarsPage() {
     </main>
   )
 }
-

@@ -52,12 +52,9 @@ export type AvatarSourceType = 'freepik_ai' | 'unsplash'
 
 export type AvatarListItem = {
   _id: string
-  _createdAt: string
-  _updatedAt: string
   alt: string
   gender: AvatarGender
   sourceType: AvatarSourceType
-  sourceUrl?: string
   image?: {
     asset?: {
       url?: string

@@ -43,7 +43,7 @@ export const avatarType = defineType({
     defineField({
       name: 'gender',
       title: 'Пол',
-      description: 'Используется как единственный фильтр каталога.',
+      description: 'Используется для фильтрации по полу в каталоге.',
       type: 'string',
       options: {
         list: genderOptions,
@@ -54,7 +54,7 @@ export const avatarType = defineType({
     defineField({
       name: 'sourceType',
       title: 'Источник',
-      description: 'Откуда взят исходник изображения.',
+      description: 'Используется для фильтрации по источнику в каталоге.',
       type: 'string',
       options: {
         list: sourceOptions,

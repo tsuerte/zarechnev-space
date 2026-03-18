@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useDeferredValue, useEffect, useMemo, useState } from "react"
 
 import { loadIconDetailAction } from "@/app/lab/icons/actions"
 import { IconDetailPanel } from "@/components/icons/icon-detail-panel"
 import { IconsGrid } from "@/components/icons/icons-grid"
 import { IconsToolbar } from "@/components/icons/icons-toolbar"
+import { DEFAULT_ICON_PREVIEW_COLOR } from "@/lib/icons/preview"
 import type { IconFamilyDetail, IconFamilySummary } from "@/lib/icons/types"
 
 type IconsWorkspaceProps = {
@@ -19,7 +20,10 @@ export function IconsWorkspace({
   initialCatalogSyncedAt,
   initialSelectedIcon,
 }: IconsWorkspaceProps) {
-  const [previewSize, setPreviewSize] = useState<16 | 24 | 32>(24)
+  const [previewSize, setPreviewSize] = useState(24)
+  const [previewStrokeWidth, setPreviewStrokeWidth] = useState(1.5)
+  const [previewColor, setPreviewColor] = useState(DEFAULT_ICON_PREVIEW_COLOR)
+  const deferredPreviewColor = useDeferredValue(previewColor)
   const [query, setQuery] = useState("")
   const [selectedIconId, setSelectedIconId] = useState<string | null>(
     initialSelectedIcon?.id ?? initialIcons[0]?.id ?? null
@@ -121,6 +125,10 @@ export function IconsWorkspace({
           onQueryChange={setQuery}
           previewSize={previewSize}
           onPreviewSizeChange={setPreviewSize}
+          previewStrokeWidth={previewStrokeWidth}
+          onPreviewStrokeWidthChange={setPreviewStrokeWidth}
+          previewColor={previewColor}
+          onPreviewColorChange={setPreviewColor}
           syncedAt={initialCatalogSyncedAt}
         />
 
@@ -131,6 +139,8 @@ export function IconsWorkspace({
               selectedIconId={selectedIconId}
               onSelect={setSelectedIconId}
               previewSize={previewSize}
+              previewStrokeWidth={previewStrokeWidth}
+              previewColor={deferredPreviewColor}
             />
           ) : (
             <div className="flex h-full min-h-[320px] items-center justify-center rounded-xl border border-dashed">
@@ -150,6 +160,8 @@ export function IconsWorkspace({
         isLoading={isDetailLoading}
         error={detailError}
         previewSize={previewSize}
+        previewStrokeWidth={previewStrokeWidth}
+        previewColor={deferredPreviewColor}
       />
     </main>
   )

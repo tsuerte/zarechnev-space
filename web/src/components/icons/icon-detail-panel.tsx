@@ -9,6 +9,9 @@ import {
   createPublicIconFileName,
   type IconFamilyDetail,
 } from "@/lib/icons/types"
+import {
+  createCustomizedIconPreviewSvg,
+} from "@/lib/icons/preview"
 import { createSvgPreviewUrl } from "@/lib/svg/client"
 import { Badge, Button, Separator } from "@/ui-kit"
 
@@ -27,6 +30,8 @@ type IconDetailPanelProps = {
   isLoading: boolean
   error: string | null
   previewSize: number
+  previewStrokeWidth: number
+  previewColor: string
 }
 
 export function IconDetailPanel({
@@ -34,6 +39,8 @@ export function IconDetailPanel({
   isLoading,
   error,
   previewSize,
+  previewStrokeWidth,
+  previewColor,
 }: IconDetailPanelProps) {
   const [copied, setCopied] = useState(false)
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
@@ -53,6 +60,23 @@ export function IconDetailPanel({
       icon.variants.find((variant) => variant.id === resolvedVariantId) ?? icon.variants[0] ?? null
     )
   }, [icon, resolvedVariantId])
+  const previewSvg = useMemo(() => {
+    if (!selectedVariant) {
+      return null
+    }
+
+    return createCustomizedIconPreviewSvg(selectedVariant.svgOptimized, {
+      color: previewColor,
+      strokeWidth: previewStrokeWidth,
+    })
+  }, [previewColor, previewStrokeWidth, selectedVariant])
+  const previewUrl = useMemo(() => {
+    if (!previewSvg) {
+      return null
+    }
+
+    return createSvgPreviewUrl(previewSvg)
+  }, [previewSvg])
 
   async function handleCopy() {
     if (!selectedVariant) {
@@ -86,7 +110,6 @@ export function IconDetailPanel({
 
   const figmaUrl = createFigmaNodeUrl(icon.figmaFileKey, icon.familyNodeId)
   const downloadName = createPublicIconFileName(icon.displayName, selectedVariant.label)
-
   return (
     <aside className="w-[360px] shrink-0 border-l bg-background">
       <div className="flex h-full flex-col">
@@ -115,7 +138,7 @@ export function IconDetailPanel({
                 style={{ width: previewSize, height: previewSize }}
               >
                 <Image
-                  src={createSvgPreviewUrl(selectedVariant.svgOptimized)}
+                  src={previewUrl ?? createSvgPreviewUrl(selectedVariant.svgOptimized)}
                   alt={icon.displayName}
                   width={previewSize}
                   height={previewSize}

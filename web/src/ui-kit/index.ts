@@ -40,6 +40,7 @@ export {
 export { Input } from "@/ui-kit/input"
 export { Label } from "@/ui-kit/label"
 export { Separator } from "@/ui-kit/separator"
+export { Slider } from "@/ui-kit/slider"
 export {
   Sheet,
   SheetClose,

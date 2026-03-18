@@ -6,13 +6,22 @@ type IconsGridProps = {
   selectedIconId: string | null
   onSelect: (id: string) => void
   previewSize: number
+  previewStrokeWidth: number
+  previewColor: string
 }
 
-export function IconsGrid({ icons, selectedIconId, onSelect, previewSize }: IconsGridProps) {
+export function IconsGrid({
+  icons,
+  selectedIconId,
+  onSelect,
+  previewSize,
+  previewStrokeWidth,
+  previewColor,
+}: IconsGridProps) {
   return (
     <div
       className="grid justify-start gap-4"
-      style={{ gridTemplateColumns: "repeat(auto-fill, minmax(144px, 176px))" }}
+      style={{ gridTemplateColumns: "repeat(auto-fill, 140px)" }}
     >
       {icons.map((icon) => (
         <IconCard
@@ -21,6 +30,8 @@ export function IconsGrid({ icons, selectedIconId, onSelect, previewSize }: Icon
           isSelected={icon.id === selectedIconId}
           onSelect={onSelect}
           previewSize={previewSize}
+          previewStrokeWidth={previewStrokeWidth}
+          previewColor={previewColor}
         />
       ))}
     </div>

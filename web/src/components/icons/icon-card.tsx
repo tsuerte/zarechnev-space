@@ -1,54 +1,55 @@
 "use client"
 
-import Image from "next/image"
+import { useMemo } from "react"
 
+import { createCustomizedIconPreviewSvg } from "@/lib/icons/preview"
 import type { IconFamilySummary } from "@/lib/icons/types"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/ui-kit"
-
-function svgToDataUrl(svg: string) {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
 
 type IconCardProps = {
   icon: IconFamilySummary
   isSelected: boolean
   onSelect: (id: string) => void
   previewSize: number
+  previewStrokeWidth: number
+  previewColor: string
 }
 
-export function IconCard({ icon, isSelected, onSelect, previewSize }: IconCardProps) {
-  const stageSize = Math.max(previewSize, 48)
+export function IconCard({
+  icon,
+  isSelected,
+  onSelect,
+  previewSize,
+  previewStrokeWidth,
+  previewColor,
+}: IconCardProps) {
+  const previewSvg = useMemo(() => {
+    return createCustomizedIconPreviewSvg(icon.previewSvgOptimized, {
+      color: previewColor,
+      strokeWidth: previewStrokeWidth,
+    })
+  }, [icon.previewSvgOptimized, previewColor, previewStrokeWidth])
 
   return (
     <button
       type="button"
       onClick={() => onSelect(icon.id)}
       className={cn(
-        "h-auto min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border border-transparent bg-transparent px-3 py-4 text-center hover:bg-surface-soft",
-        "inline-flex outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "inline-flex size-[140px] min-w-0 flex-col items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-2.5 py-2.5 text-center outline-none hover:bg-surface-soft focus-visible:ring-[3px] focus-visible:ring-ring/50",
         isSelected && "bg-surface-soft"
       )}
     >
-      <div className="flex items-center justify-center" style={{ minHeight: stageSize }}>
-        <Image
-          src={svgToDataUrl(icon.previewSvgOptimized)}
-          alt={icon.displayName}
-          width={previewSize}
-          height={previewSize}
-          unoptimized
-          className="object-contain text-foreground"
+      <div className="flex items-center justify-center">
+        <span
+          aria-hidden="true"
+          className="block shrink-0 text-foreground"
           style={{ width: previewSize, height: previewSize }}
+          dangerouslySetInnerHTML={{ __html: previewSvg }}
         />
       </div>
-      <div className="flex min-h-8 w-full items-start justify-center gap-1.5">
-        <p className="min-w-0 text-center text-xs leading-4 text-muted-foreground">
-          {icon.displayName}
-        </p>
-        {icon.syncStatus === "sync-error" ? (
-          <Badge variant="secondary">Sync error</Badge>
-        ) : null}
-      </div>
+      <p className="line-clamp-2 w-full text-center text-xs leading-4 text-muted-foreground">
+        {icon.displayName}
+      </p>
     </button>
   )
 }

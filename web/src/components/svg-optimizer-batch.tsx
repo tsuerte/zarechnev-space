@@ -2,7 +2,16 @@
 
 import JSZip from "jszip"
 import Image from "next/image"
-import { Fragment, useRef, useState, type DragEvent } from "react"
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type DragEvent,
+} from "react"
+import { Copy, Download, Eye, FileUp, RotateCcw } from "lucide-react"
+
 import {
   Alert,
   AlertDescription,
@@ -18,13 +27,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui-kit"
-import { Copy, Download, Eye, FileUp, RotateCcw } from "lucide-react"
-
 import {
   buildOptimizedSvgFileName,
+  buildUniqueOptimizedSvgFileNames,
+  createPastedSvgFile,
   createSvgPreviewUrl,
   formatBytes,
   formatSavedBytes,
+  isEditableTarget,
 } from "@/lib/svg/client"
 import type {
   OptimizeSvgBatchItemResult,
@@ -46,6 +56,10 @@ function downloadSvg(svg: string, fileName: string) {
   URL.revokeObjectURL(url)
 }
 
+function looksLikeSvgText(value: string) {
+  return /<svg[\s>]/i.test(value)
+}
+
 export function SvgOptimizerBatch() {
   const fileInputId = "svg-optimizer-batch-file-input"
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -58,8 +72,11 @@ export function SvgOptimizerBatch() {
   const [originalPreviewMap, setOriginalPreviewMap] = useState<Record<string, string>>({})
   const [previewErrorMap, setPreviewErrorMap] = useState<Record<string, string>>({})
   const [previewLoadingKey, setPreviewLoadingKey] = useState<string | null>(null)
+  const [copiedSingle, setCopiedSingle] = useState(false)
+  const [singleOriginalPreview, setSingleOriginalPreview] = useState<string | null>(null)
+  const [singlePreviewError, setSinglePreviewError] = useState("")
 
-  async function optimizeFiles(files: File[]) {
+  const optimizeFiles = useCallback(async (files: File[]) => {
     setIsPending(true)
     setError("")
 
@@ -89,47 +106,140 @@ export function SvgOptimizerBatch() {
     } finally {
       setIsPending(false)
     }
-  }
+  }, [])
 
-  async function handleFiles(files: File[]) {
-    if (files.length === 0) {
-      return
-    }
-
-    if (files.length > MAX_SVG_BATCH_FILES) {
-      setError(`Можно загрузить не больше ${MAX_SVG_BATCH_FILES} SVG за раз.`)
-      setSelectedFiles([])
-      setResult(null)
-      return
-    }
-
-    const totalUploadBytes = files.reduce((sum, file) => sum + file.size, 0)
-    if (totalUploadBytes > MAX_SVG_BATCH_TOTAL_SIZE) {
-      setError("Общий размер набора слишком большой. Лимит: 20 MB.")
-      setSelectedFiles([])
-      setResult(null)
-      return
-    }
-
-    setSelectedFiles(files)
-    setResult(null)
-    setError("")
+  const resetPreviewState = useCallback(() => {
     setExpandedPreviewKey(null)
     setOriginalPreviewMap({})
     setPreviewErrorMap({})
+    setPreviewLoadingKey(null)
+    setCopiedSingle(false)
+    setSingleOriginalPreview(null)
+    setSinglePreviewError("")
+  }, [])
 
-    await optimizeFiles(files)
-  }
+  const handleFiles = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) {
+        return
+      }
+
+      if (files.length > MAX_SVG_BATCH_FILES) {
+        setError(`Можно загрузить не больше ${MAX_SVG_BATCH_FILES} SVG за раз.`)
+        setSelectedFiles([])
+        setResult(null)
+        resetPreviewState()
+        return
+      }
+
+      const totalUploadBytes = files.reduce((sum, file) => sum + file.size, 0)
+      if (totalUploadBytes > MAX_SVG_BATCH_TOTAL_SIZE) {
+        setError("Общий размер набора слишком большой. Лимит: 20 MB.")
+        setSelectedFiles([])
+        setResult(null)
+        resetPreviewState()
+        return
+      }
+
+      setSelectedFiles(files)
+      setResult(null)
+      setError("")
+      setIsDragOver(false)
+      resetPreviewState()
+
+      await optimizeFiles(files)
+    },
+    [optimizeFiles, resetPreviewState]
+  )
 
   function handleReset() {
     setSelectedFiles([])
     setResult(null)
     setError("")
     setIsDragOver(false)
-    setExpandedPreviewKey(null)
-    setOriginalPreviewMap({})
-    setPreviewErrorMap({})
+    resetPreviewState()
   }
+
+  async function handlePaste() {
+    try {
+      const clipboardText = await navigator.clipboard.readText()
+
+      if (!clipboardText.trim()) {
+        setError("Буфер обмена пуст.")
+        return
+      }
+
+      if (!looksLikeSvgText(clipboardText)) {
+        setError("В буфере обмена нет SVG.")
+        return
+      }
+
+      await handleFiles([createPastedSvgFile(clipboardText)])
+    } catch {
+      setError("Не удалось прочитать SVG из буфера обмена.")
+    }
+  }
+
+  const handleWindowPaste = useCallback(
+    (event: ClipboardEvent) => {
+      if (isEditableTarget(event.target)) {
+        return
+      }
+
+      const clipboardText = event.clipboardData?.getData("text/plain") ?? ""
+
+      if (!clipboardText.trim() || !looksLikeSvgText(clipboardText)) {
+        return
+      }
+
+      event.preventDefault()
+      void handleFiles([createPastedSvgFile(clipboardText)])
+    },
+    [handleFiles]
+  )
+
+  useEffect(() => {
+    window.addEventListener("paste", handleWindowPaste)
+
+    return () => {
+      window.removeEventListener("paste", handleWindowPaste)
+    }
+  }, [handleWindowPaste])
+
+  useEffect(() => {
+    setSingleOriginalPreview(null)
+    setSinglePreviewError("")
+
+    if (!result || result.items.length !== 1) {
+      return
+    }
+
+    const singleItem = result.items[0]
+    const sourceFile = selectedFiles[0]
+
+    if (!sourceFile || singleItem.error || !singleItem.optimizedSvg) {
+      return
+    }
+
+    let cancelled = false
+
+    void sourceFile
+      .text()
+      .then((originalSvg) => {
+        if (!cancelled) {
+          setSingleOriginalPreview(originalSvg)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSinglePreviewError("Не удалось прочитать исходный SVG для превью.")
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [result, selectedFiles])
 
   function handleDragOver(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
@@ -167,6 +277,16 @@ export function SvgOptimizerBatch() {
     await navigator.clipboard.writeText(item.optimizedSvg)
   }
 
+  async function handleCopySingle(item: OptimizeSvgBatchItemResult) {
+    if (!item.optimizedSvg) {
+      return
+    }
+
+    await navigator.clipboard.writeText(item.optimizedSvg)
+    setCopiedSingle(true)
+    window.setTimeout(() => setCopiedSingle(false), 1200)
+  }
+
   async function handleDownloadZip() {
     if (!result) {
       return
@@ -181,10 +301,13 @@ export function SvgOptimizerBatch() {
     }
 
     const zip = new JSZip()
+    const zipFileNames = buildUniqueOptimizedSvgFileNames(
+      successfulItems.map((item) => item.fileName)
+    )
 
-    successfulItems.forEach((item) => {
+    successfulItems.forEach((item, index) => {
       zip.file(
-        buildOptimizedSvgFileName(item.fileName),
+        zipFileNames[index],
         item.optimizedSvg as string
       )
     })
@@ -248,55 +371,65 @@ export function SvgOptimizerBatch() {
 
   const selectedFilesBytes = selectedFiles.reduce((sum, file) => sum + file.size, 0)
   const savedBytes = result ? result.originalBytes - result.optimizedBytes : 0
+  const isSingleResult = result ? result.items.length === 1 : false
+  const singleItem = result && result.items.length === 1 ? result.items[0] : null
+  const singleSavedBytes =
+    singleItem && !singleItem.error
+      ? singleItem.originalBytes - singleItem.optimizedBytes
+      : 0
 
   return (
     <div className="min-w-0 space-y-4">
+      <input
+        id={fileInputId}
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".svg,image/svg+xml"
+        className="sr-only"
+        onChange={(event) => {
+          const files = Array.from(event.target.files ?? [])
+          if (files.length > 0) {
+            void handleFiles(files)
+          }
+          event.currentTarget.value = ""
+        }}
+      />
+
       <Card>
         <CardContent className="space-y-4">
-          <input
-            id={fileInputId}
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".svg,image/svg+xml"
-            className="sr-only"
-            onChange={(event) => {
-              const files = Array.from(event.target.files ?? [])
-              if (files.length > 0) {
-                void handleFiles(files)
-              }
-              event.currentTarget.value = ""
-            }}
-          />
-
           {selectedFiles.length === 0 ? (
-            <label
-              htmlFor={fileInputId}
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center transition-colors ${
-                isDragOver
-                  ? "border-foreground/20 bg-surface-soft"
-                  : "border-border bg-surface-soft/50 hover:bg-surface-soft"
-              }`}
-              onDragOver={handleDragOver}
-              onDragEnter={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={(event) => {
-                void handleDrop(event)
-              }}
-            >
-              <FileUp className="mb-3 size-5" />
-              <span className="text-sm font-medium">
-                Перетащи SVG сюда или выбери файлы
-              </span>
-              <span className="text-muted-foreground mt-1 text-sm">
-                До 10 файлов за раз. До 5 MB на файл и 20 MB на набор.
-              </span>
-            </label>
+            <div className="space-y-3">
+              <label
+                htmlFor={fileInputId}
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center transition-colors ${
+                  isDragOver
+                    ? "border-foreground/20 bg-surface-soft"
+                    : "border-border bg-surface-soft/50 hover:bg-surface-soft"
+                }`}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={(event) => {
+                  void handleDrop(event)
+                }}
+              >
+                <FileUp className="mb-3 size-5" />
+                <span className="text-sm font-medium">
+                  Перетащи SVG сюда или выбери файлы
+                </span>
+                <span className="text-muted-foreground mt-1 text-sm">
+                  Можно вставить один SVG через Ctrl+V. До 10 файлов за раз. До 5 MB на файл и 20 MB на набор.
+                </span>
+              </label>
+            </div>
           ) : (
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <p className="text-sm font-medium">
-                  {selectedFiles.length} файлов в наборе
+                <p className="truncate text-sm font-medium">
+                  {selectedFiles.length === 1
+                    ? selectedFiles[0]?.name
+                    : `${selectedFiles.length} файлов в наборе`}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   {formatBytes(selectedFilesBytes)}
@@ -312,7 +445,15 @@ export function SvgOptimizerBatch() {
                 >
                   Загрузить новый набор
                 </Button>
-                {result ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void handlePaste()}
+                  disabled={isPending}
+                >
+                  Вставить из буфера
+                </Button>
+                {result && !isSingleResult ? (
                   <Button
                     type="button"
                     onClick={() => void handleDownloadZip()}
@@ -345,193 +486,302 @@ export function SvgOptimizerBatch() {
 
       {result ? (
         <>
-          <Card>
-            <CardContent className="flex min-w-0 flex-col gap-3 overflow-hidden p-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                <Badge variant="outline">{result.totalCount} файлов</Badge>
-                <Badge variant="outline">{result.successCount} успешно</Badge>
-                {result.failedCount > 0 ? (
-                  <Badge variant="outline">{result.failedCount} с ошибкой</Badge>
-                ) : null}
-                <Separator orientation="vertical" className="hidden h-8 xl:block" />
-                <div className="space-y-0.5">
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
-                    До
-                  </p>
-                  <p className="font-medium">{formatBytes(result.originalBytes)}</p>
-                </div>
-                <Separator orientation="vertical" className="hidden h-8 xl:block" />
-                <div className="space-y-0.5">
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
-                    После
-                  </p>
-                  <p className="font-medium">{formatBytes(result.optimizedBytes)}</p>
-                </div>
-                <Separator orientation="vertical" className="hidden h-8 xl:block" />
-                <div className="space-y-0.5">
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
-                    Экономия
-                  </p>
-                  <p className="font-medium">
-                    {formatSavedBytes(savedBytes)}{" "}
-                    <span className="text-muted-foreground">
-                      ({result.savedPercent}%)
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {singleItem ? (
+            <>
+              {singleItem.error ? (
+                <Card>
+                  <CardContent className="space-y-3 p-4">
+                    <div className="space-y-1">
+                      <p className="truncate text-sm font-medium">{singleItem.fileName}</p>
+                      <Badge variant="destructive">Ошибка</Badge>
+                    </div>
+                    <Alert variant="destructive">
+                      <AlertDescription>{singleItem.error}</AlertDescription>
+                    </Alert>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <Card>
+                    <CardContent className="flex min-w-0 flex-col gap-3 overflow-hidden p-3 xl:flex-row xl:items-center xl:justify-between">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                        <div className="space-y-0.5">
+                          <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                            До
+                          </p>
+                          <p className="font-medium">{formatBytes(singleItem.originalBytes)}</p>
+                        </div>
+                        <Separator orientation="vertical" className="hidden h-8 xl:block" />
+                        <div className="space-y-0.5">
+                          <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                            После
+                          </p>
+                          <p className="font-medium">{formatBytes(singleItem.optimizedBytes)}</p>
+                        </div>
+                        <Separator orientation="vertical" className="hidden h-8 xl:block" />
+                        <div className="space-y-0.5">
+                          <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                            Экономия
+                          </p>
+                          <p className="font-medium">
+                            {formatSavedBytes(singleSavedBytes)}{" "}
+                            <span className="text-muted-foreground">
+                              ({singleItem.savedPercent}%)
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" onClick={() => void handleCopySingle(singleItem)}>
+                          <Copy className="size-4" />
+                          {copiedSingle ? "Скопировано" : "Копировать SVG"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => handleDownloadItem(singleItem)}
+                        >
+                          <Download className="size-4" />
+                          Скачать
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Файл</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>До</TableHead>
-                    <TableHead>После</TableHead>
-                    <TableHead>Экономия</TableHead>
-                    <TableHead className="text-right">Действие</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {result.items.map((item, index) => {
-                      const rowKey = `${item.fileName}-${index}`
-                      const isExpanded = expandedPreviewKey === rowKey
-                      const originalPreview = originalPreviewMap[rowKey]
-                      const previewError = previewErrorMap[rowKey]
+                  <Card>
+                    <CardContent className="min-w-0 space-y-4 p-4">
+                      {singlePreviewError ? (
+                        <Alert variant="destructive">
+                          <AlertDescription>{singlePreviewError}</AlertDescription>
+                        </Alert>
+                      ) : !singleOriginalPreview ? (
+                        <div className="text-muted-foreground text-sm">Готовим превью...</div>
+                      ) : (
+                        <div className="grid gap-4 divide-y lg:grid-cols-2 lg:gap-0 lg:divide-y-0 lg:divide-x">
+                          <div className="space-y-3 pb-4 lg:pr-4 lg:pb-0">
+                            <p className="text-sm font-medium">Оригинал</p>
+                            <div className="bg-surface-soft/40 flex aspect-[16/10] items-center justify-center rounded-xl p-6">
+                              <Image
+                                src={createSvgPreviewUrl(singleOriginalPreview)}
+                                alt={`Оригинал ${singleItem.fileName}`}
+                                width={520}
+                                height={360}
+                                unoptimized
+                                className="h-auto max-h-full w-auto max-w-full"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-3 pt-4 lg:pl-4 lg:pt-0">
+                            <p className="text-sm font-medium">Оптимизированный</p>
+                            <div className="bg-surface-soft/40 flex aspect-[16/10] items-center justify-center rounded-xl p-6">
+                              <Image
+                                src={createSvgPreviewUrl(singleItem.optimizedSvg ?? "")}
+                                alt={`Оптимизированный ${singleItem.fileName}`}
+                                width={520}
+                                height={360}
+                                unoptimized
+                                className="h-auto max-h-full w-auto max-w-full"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Card>
+                <CardContent className="flex min-w-0 flex-col gap-3 overflow-hidden p-3 xl:flex-row xl:items-center xl:justify-between">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                    <Badge variant="outline">{result.totalCount} файлов</Badge>
+                    <Badge variant="outline">{result.successCount} успешно</Badge>
+                    {result.failedCount > 0 ? (
+                      <Badge variant="outline">{result.failedCount} с ошибкой</Badge>
+                    ) : null}
+                    <Separator orientation="vertical" className="hidden h-8 xl:block" />
+                    <div className="space-y-0.5">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                        До
+                      </p>
+                      <p className="font-medium">{formatBytes(result.originalBytes)}</p>
+                    </div>
+                    <Separator orientation="vertical" className="hidden h-8 xl:block" />
+                    <div className="space-y-0.5">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                        После
+                      </p>
+                      <p className="font-medium">{formatBytes(result.optimizedBytes)}</p>
+                    </div>
+                    <Separator orientation="vertical" className="hidden h-8 xl:block" />
+                    <div className="space-y-0.5">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                        Экономия
+                      </p>
+                      <p className="font-medium">
+                        {formatSavedBytes(savedBytes)}{" "}
+                        <span className="text-muted-foreground">
+                          ({result.savedPercent}%)
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                      return (
-                        <Fragment key={rowKey}>
-                          <TableRow
-                            className={cn(
-                              item.error && "bg-destructive/5 hover:bg-destructive/10"
-                            )}
-                          >
-                            <TableCell className="max-w-[320px]">
-                              <div className="truncate font-normal">{item.fileName}</div>
-                            </TableCell>
-                            <TableCell className="whitespace-normal">
-                              {item.error ? (
-                                <div className="space-y-1">
-                                  <Badge variant="destructive">Ошибка</Badge>
-                                  <p className="text-destructive text-sm">{item.error}</p>
-                                </div>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className="text-muted-foreground border-border"
-                                >
-                                  Готово
-                                </Badge>
+              <Card>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Файл</TableHead>
+                        <TableHead>Статус</TableHead>
+                        <TableHead>До</TableHead>
+                        <TableHead>После</TableHead>
+                        <TableHead>Экономия</TableHead>
+                        <TableHead className="text-right">Действие</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {result.items.map((item, index) => {
+                        const rowKey = `${item.fileName}-${index}`
+                        const isExpanded = expandedPreviewKey === rowKey
+                        const originalPreview = originalPreviewMap[rowKey]
+                        const previewError = previewErrorMap[rowKey]
+
+                        return (
+                          <Fragment key={rowKey}>
+                            <TableRow
+                              className={cn(
+                                item.error && "bg-destructive/5 hover:bg-destructive/10"
                               )}
-                            </TableCell>
-                            <TableCell>
-                              {item.error ? "—" : formatBytes(item.originalBytes)}
-                            </TableCell>
-                            <TableCell>
-                              {item.error ? "—" : formatBytes(item.optimizedBytes)}
-                            </TableCell>
-                            <TableCell>
-                              {item.error
-                                ? "—"
-                                : `${formatSavedBytes(
-                                    item.originalBytes - item.optimizedBytes
-                                  )} (${item.savedPercent}%)`}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {item.optimizedSvg ? (
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    type="button"
+                            >
+                              <TableCell className="max-w-[320px]">
+                                <div className="truncate font-normal">{item.fileName}</div>
+                              </TableCell>
+                              <TableCell className="whitespace-normal">
+                                {item.error ? (
+                                  <div className="space-y-1">
+                                    <Badge variant="destructive">Ошибка</Badge>
+                                    <p className="text-destructive text-sm">{item.error}</p>
+                                  </div>
+                                ) : (
+                                  <Badge
                                     variant="outline"
-                                    size="icon"
-                                    onClick={() => void handleTogglePreview(item, index)}
-                                    aria-expanded={isExpanded}
-                                    aria-label="Сравнить SVG"
-                                    title="Сравнить SVG"
+                                    className="text-muted-foreground border-border"
                                   >
-                                    <Eye className="size-4" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => void handleCopyItem(item)}
-                                    aria-label="Копировать SVG"
-                                    title="Копировать SVG"
-                                  >
-                                    <Copy className="size-4" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => handleDownloadItem(item)}
-                                    aria-label="Скачать SVG"
-                                    title="Скачать SVG"
-                                  >
-                                    <Download className="size-4" />
-                                  </Button>
-                                </div>
-                              ) : null}
-                            </TableCell>
-                          </TableRow>
-                          {isExpanded ? (
-                            <TableRow className="hover:bg-transparent">
-                              <TableCell colSpan={6} className="p-0">
-                                <div className="bg-surface-soft/30 p-4">
-                                  {previewError ? (
-                                    <Alert variant="destructive">
-                                      <AlertDescription>{previewError}</AlertDescription>
-                                    </Alert>
-                                  ) : previewLoadingKey === rowKey || !originalPreview ? (
-                                    <div className="text-muted-foreground text-sm">
-                                      Готовим превью...
-                                    </div>
-                                  ) : (
-                                    <div className="grid gap-4 divide-y lg:grid-cols-2 lg:gap-0 lg:divide-y-0 lg:divide-x">
-                                      <div className="space-y-3 pb-4 lg:pr-4 lg:pb-0">
-                                        <p className="text-sm font-medium">Оригинал</p>
-                                        <div className="bg-background flex aspect-[16/10] items-center justify-center rounded-xl p-6">
-                                          <Image
-                                            src={createSvgPreviewUrl(originalPreview)}
-                                            alt={`Оригинал ${item.fileName}`}
-                                            width={520}
-                                            height={360}
-                                            unoptimized
-                                            className="h-auto max-h-full w-auto max-w-full"
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="space-y-3 pt-4 lg:pl-4 lg:pt-0">
-                                        <p className="text-sm font-medium">Оптимизированный</p>
-                                        <div className="bg-background flex aspect-[16/10] items-center justify-center rounded-xl p-6">
-                                          <Image
-                                            src={createSvgPreviewUrl(item.optimizedSvg ?? "")}
-                                            alt={`Оптимизированный ${item.fileName}`}
-                                            width={520}
-                                            height={360}
-                                            unoptimized
-                                            className="h-auto max-h-full w-auto max-w-full"
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
+                                    Готово
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {item.error ? "—" : formatBytes(item.originalBytes)}
+                              </TableCell>
+                              <TableCell>
+                                {item.error ? "—" : formatBytes(item.optimizedBytes)}
+                              </TableCell>
+                              <TableCell>
+                                {item.error
+                                  ? "—"
+                                  : `${formatSavedBytes(
+                                      item.originalBytes - item.optimizedBytes
+                                    )} (${item.savedPercent}%)`}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {item.optimizedSvg ? (
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => void handleTogglePreview(item, index)}
+                                      aria-expanded={isExpanded}
+                                      aria-label="Сравнить SVG"
+                                      title="Сравнить SVG"
+                                    >
+                                      <Eye className="size-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => void handleCopyItem(item)}
+                                      aria-label="Копировать SVG"
+                                      title="Копировать SVG"
+                                    >
+                                      <Copy className="size-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => handleDownloadItem(item)}
+                                      aria-label="Скачать SVG"
+                                      title="Скачать SVG"
+                                    >
+                                      <Download className="size-4" />
+                                    </Button>
+                                  </div>
+                                ) : null}
                               </TableCell>
                             </TableRow>
-                          ) : null}
-                        </Fragment>
-                      )
-                    })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                            {isExpanded ? (
+                              <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={6} className="p-0">
+                                  <div className="bg-surface-soft/30 p-4">
+                                    {previewError ? (
+                                      <Alert variant="destructive">
+                                        <AlertDescription>{previewError}</AlertDescription>
+                                      </Alert>
+                                    ) : previewLoadingKey === rowKey || !originalPreview ? (
+                                      <div className="text-muted-foreground text-sm">
+                                        Готовим превью...
+                                      </div>
+                                    ) : (
+                                      <div className="grid gap-4 divide-y lg:grid-cols-2 lg:gap-0 lg:divide-y-0 lg:divide-x">
+                                        <div className="space-y-3 pb-4 lg:pr-4 lg:pb-0">
+                                          <p className="text-sm font-medium">Оригинал</p>
+                                          <div className="bg-background flex aspect-[16/10] items-center justify-center rounded-xl p-6">
+                                            <Image
+                                              src={createSvgPreviewUrl(originalPreview)}
+                                              alt={`Оригинал ${item.fileName}`}
+                                              width={520}
+                                              height={360}
+                                              unoptimized
+                                              className="h-auto max-h-full w-auto max-w-full"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="space-y-3 pt-4 lg:pl-4 lg:pt-0">
+                                          <p className="text-sm font-medium">Оптимизированный</p>
+                                          <div className="bg-background flex aspect-[16/10] items-center justify-center rounded-xl p-6">
+                                            <Image
+                                              src={createSvgPreviewUrl(item.optimizedSvg ?? "")}
+                                              alt={`Оптимизированный ${item.fileName}`}
+                                              width={520}
+                                              height={360}
+                                              unoptimized
+                                              className="h-auto max-h-full w-auto max-w-full"
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : null}
+                          </Fragment>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </>
       ) : null}
     </div>

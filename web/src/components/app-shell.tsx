@@ -29,7 +29,7 @@ const segmentLabels: Record<string, string> = {
   lab: "Мастерская",
   avatars: "Аватары",
   icons: "Иконки",
-  svg: "SVG",
+  svg: "SVG Optimizer",
   zalivator: "Zalivator",
 }
 

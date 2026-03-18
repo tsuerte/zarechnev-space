@@ -63,7 +63,7 @@ const data: { navMain: NavSection[] } = {
           icon: FlaskConical,
         },
         {
-          title: "SVG",
+          title: "SVG Optimizer",
           url: "/lab/svg",
           icon: FlaskConical,
         },

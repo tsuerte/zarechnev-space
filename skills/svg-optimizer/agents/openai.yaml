@@ -1,0 +1,4 @@
+interface:
+  display_name: "SVG Optimizer"
+  short_description: "Support for the /lab/svg optimization tool"
+  default_prompt: "Use $svg-optimizer to work on the /lab/svg feature, unified optimizer UI, batch optimize API, or canonical SVG pipeline."

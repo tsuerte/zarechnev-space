@@ -26,6 +26,23 @@ export function buildOptimizedSvgFileName(fileName: string) {
   return `${baseName}.optimized.svg`
 }
 
+export function buildUniqueOptimizedSvgFileNames(fileNames: string[]) {
+  const occurrences = new Map<string, number>()
+
+  return fileNames.map((fileName) => {
+    const optimizedFileName = buildOptimizedSvgFileName(fileName)
+    const nextCount = (occurrences.get(optimizedFileName) ?? 0) + 1
+
+    occurrences.set(optimizedFileName, nextCount)
+
+    if (nextCount === 1) {
+      return optimizedFileName
+    }
+
+    return optimizedFileName.replace(/\.svg$/i, `-${nextCount}.svg`)
+  })
+}
+
 export function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
     return false

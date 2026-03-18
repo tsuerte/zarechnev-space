@@ -2,7 +2,7 @@ import { SvgOptimizer } from "@/components/svg-optimizer"
 import { buildMetadata } from "@/lib/seo"
 
 export const metadata = buildMetadata({
-  title: "SVG",
+  title: "SVG Optimizer",
   description: "Инструмент для очистки и сжатия SVG.",
   path: "/lab/svg",
 })

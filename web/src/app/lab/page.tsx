@@ -38,7 +38,7 @@ export default function LabPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/lab/svg" className="hover:underline">
-                SVG
+                SVG Optimizer
               </Link>
             </CardTitle>
             <CardDescription>Инструмент для очистки и сжатия SVG.</CardDescription>

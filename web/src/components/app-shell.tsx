@@ -26,6 +26,7 @@ type Crumb = {
 
 const segmentLabels: Record<string, string> = {
   cases: "Кейсы",
+  designops: "DesignOps",
   lab: "Мастерская",
   avatars: "Аватары",
   icons: "Иконки",
@@ -44,17 +45,18 @@ function resolveCrumbLabel(
   parts: string[],
   index: number,
   segment: string,
-  caseTitleBySlug: Map<string, string>
+  caseTitleByPath: Map<string, string>
 ) {
-  if (parts[0] === "cases" && index === 1) {
+  if ((parts[0] === "cases" || parts[0] === "designops") && index === 1) {
     const decodedSlug = decodeURIComponent(segment)
-    return caseTitleBySlug.get(decodedSlug) ?? humanizeSegment(segment)
+    const resolvedPath = `/${parts[0]}/${decodedSlug}`
+    return caseTitleByPath.get(resolvedPath) ?? humanizeSegment(segment)
   }
 
   return humanizeSegment(segment)
 }
 
-function buildCrumbs(pathname: string, caseTitleBySlug: Map<string, string>): Crumb[] {
+function buildCrumbs(pathname: string, caseTitleByPath: Map<string, string>): Crumb[] {
   const parts = pathname.split("/").filter(Boolean)
 
   if (parts.length === 0) {
@@ -64,7 +66,7 @@ function buildCrumbs(pathname: string, caseTitleBySlug: Map<string, string>): Cr
   return parts.map((part, index) => ({
     key: `path-${index}`,
     href: `/${parts.slice(0, index + 1).join("/")}`,
-    label: resolveCrumbLabel(parts, index, part, caseTitleBySlug),
+    label: resolveCrumbLabel(parts, index, part, caseTitleByPath),
   }))
 }
 
@@ -76,11 +78,17 @@ type AppShellProps = {
 export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
   const pathname = usePathname()
   const isFramelessPage = pathname === "/lab/zalivator" || pathname === "/lab/icons"
-  const caseTitleBySlug = useMemo(
-    () => new Map(sidebarCaseItems.map((caseItem) => [caseItem.slug, caseItem.title])),
+  const caseTitleByPath = useMemo(
+    () =>
+      new Map(
+        sidebarCaseItems.map((caseItem) => [
+          `/${caseItem.section === "designops" ? "designops" : "cases"}/${caseItem.slug}`,
+          caseItem.title,
+        ])
+      ),
     [sidebarCaseItems]
   )
-  const crumbs = buildCrumbs(pathname, caseTitleBySlug)
+  const crumbs = buildCrumbs(pathname, caseTitleByPath)
 
   return (
     <SidebarProvider>

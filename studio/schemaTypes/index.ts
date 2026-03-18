@@ -1,5 +1,4 @@
 import {caseStudyType} from './caseStudyType'
-import {categoryType} from './categoryType'
 import {calloutType} from './calloutType'
 import {codeBlockType} from './codeBlockType'
 import {contentImageType} from './contentImageType'
@@ -10,7 +9,6 @@ import {avatarType} from './avatarType'
 
 export const schemaTypes = [
   caseStudyType,
-  categoryType,
   calloutType,
   codeBlockType,
   contentImageType,

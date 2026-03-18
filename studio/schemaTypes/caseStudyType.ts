@@ -19,6 +19,21 @@ export const caseStudyType = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'section',
+      title: 'Site Section',
+      type: 'string',
+      description: 'Public site section that should render this material.',
+      initialValue: 'cases',
+      options: {
+        list: [
+          {title: 'Cases', value: 'cases'},
+          {title: 'DesignOps', value: 'designops'},
+        ],
+        layout: 'radio',
+      },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: 'excerpt',
       title: 'Excerpt',
       type: 'text',
@@ -31,17 +46,6 @@ export const caseStudyType = defineType({
       type: 'datetime',
       initialValue: () => new Date().toISOString(),
       validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'categories',
-      title: 'Categories',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'reference',
-          to: [{type: 'category'}],
-        }),
-      ],
     }),
     defineField({
       name: 'coverImage',

@@ -6,7 +6,7 @@ import { PortableTextRenderer } from "@/components/portable-text"
 import { formatPublishedDate } from "@/lib/date"
 import { buildMetadata } from "@/lib/seo"
 import { sanityClient } from "@/lib/sanity/client"
-import { caseStudyBySlugAndSectionQuery, caseStudySlugsQuery } from "@/lib/sanity/queries"
+import { caseStudyBySlugAndSectionQuery, designOpsSlugsQuery } from "@/lib/sanity/queries"
 import type { CaseStudy } from "@/lib/sanity/types"
 import { Separator } from "@/ui-kit"
 
@@ -20,15 +20,15 @@ type CaseStudySlug = {
 
 export const revalidate = 300
 
-async function getCaseStudy(slug: string): Promise<CaseStudy | null> {
+async function getDesignOpsItem(slug: string): Promise<CaseStudy | null> {
   return sanityClient.fetch<CaseStudy | null>(caseStudyBySlugAndSectionQuery, {
     slug,
-    section: "cases",
+    section: "designops",
   })
 }
 
 export async function generateStaticParams() {
-  const slugs = await sanityClient.fetch<CaseStudySlug[]>(caseStudySlugsQuery)
+  const slugs = await sanityClient.fetch<CaseStudySlug[]>(designOpsSlugsQuery)
   return slugs.map((item) => ({ slug: item.slug }))
 }
 
@@ -38,12 +38,12 @@ export async function generateMetadata({
   params: Promise<PageParams>
 }): Promise<Metadata> {
   const { slug } = await params
-  const item = await getCaseStudy(slug)
+  const item = await getDesignOpsItem(slug)
 
   if (!item) {
     return buildMetadata({
       title: "Not found",
-      path: `/cases/${slug}`,
+      path: `/designops/${slug}`,
       noindex: true,
     })
   }
@@ -51,19 +51,19 @@ export async function generateMetadata({
   return buildMetadata({
     title: item.title,
     description: item.excerpt || item.title,
-    path: `/cases/${item.slug ?? slug}`,
+    path: `/designops/${item.slug ?? slug}`,
     image: item.coverImage?.asset?.url,
     type: "article",
   })
 }
 
-export default async function CaseStudyPage({
+export default async function DesignOpsArticlePage({
   params,
 }: {
   params: Promise<PageParams>
 }) {
   const { slug } = await params
-  const item = await getCaseStudy(slug)
+  const item = await getDesignOpsItem(slug)
 
   if (!item) {
     notFound()

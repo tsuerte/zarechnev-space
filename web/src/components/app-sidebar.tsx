@@ -1,5 +1,14 @@
 import * as React from "react"
-import { ChevronRight, Command, FlaskConical, FolderOpen } from "lucide-react"
+import {
+  ChevronRight,
+  CircleUserRound,
+  Command,
+  Droplets,
+  FileCode2,
+  File,
+  FolderOpen,
+  Shapes,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -26,11 +35,12 @@ type NavItem = {
   children?: Array<{
     title: string
     url: string
+    icon?: LucideIcon
   }>
 }
 
 type NavSection = {
-  title: string
+  title?: string
   url: string
   items: NavItem[]
 }
@@ -38,7 +48,6 @@ type NavSection = {
 const data: { navMain: NavSection[] } = {
   navMain: [
     {
-      title: "Getting Started",
       url: "#",
       items: [
         {
@@ -49,28 +58,33 @@ const data: { navMain: NavSection[] } = {
       ],
     },
     {
+      title: "DesignOps",
+      url: "#",
+      items: [],
+    },
+    {
       title: "Мастерская",
       url: "#",
       items: [
         {
           title: "Аватары",
           url: "/lab/avatars",
-          icon: FlaskConical,
+          icon: CircleUserRound,
         },
         {
           title: "Иконки",
           url: "/lab/icons",
-          icon: FlaskConical,
+          icon: Shapes,
         },
         {
           title: "SVG Optimizer",
           url: "/lab/svg",
-          icon: FlaskConical,
+          icon: FileCode2,
         },
         {
           title: "Zalivator",
           url: "/lab/zalivator",
-          icon: FlaskConical,
+          icon: Droplets,
         },
       ],
     },
@@ -106,22 +120,55 @@ function isItemExactActive(pathname: string, url: string) {
   return pathname === url
 }
 
+const designOpsOrder = [
+  "designer-value",
+  "design-critique",
+  "early-engagement",
+  "design-debt",
+] as const
+
+const designOpsOrderMap = new Map<string, number>(
+  designOpsOrder.map((slug, index) => [slug, index])
+)
+
 export function AppSidebar({
   pathname,
   sidebarCaseItems,
   ...props
 }: AppSidebarProps) {
-  const navData = React.useMemo(() => {
+  const navData = React.useMemo<NavSection[]>(() => {
     return data.navMain.map((section) => ({
       ...section,
-      items: section.items.map((item) => {
+      items:
+        section.title === "DesignOps"
+          ? sidebarCaseItems
+              .filter((caseItem) => caseItem.section === "designops")
+              .sort((left, right) => {
+                const leftIndex = designOpsOrderMap.get(left.slug) ?? Number.MAX_SAFE_INTEGER
+                const rightIndex = designOpsOrderMap.get(right.slug) ?? Number.MAX_SAFE_INTEGER
+
+                if (leftIndex !== rightIndex) {
+                  return leftIndex - rightIndex
+                }
+
+                return left.title.localeCompare(right.title, "ru")
+              })
+              .map((caseItem) => ({
+                title: caseItem.title,
+                url: `/designops/${caseItem.slug}`,
+                icon: File,
+              })) satisfies NavItem[]
+          : section.items.map((item) => {
         if (item.url !== "/cases") {
           return item
         }
 
         return {
           ...item,
-          children: sidebarCaseItems.map((caseItem) => ({
+          children: sidebarCaseItems
+            .filter((caseItem) => caseItem.section === "cases")
+            .map((caseItem) => ({
+            icon: undefined,
             title: caseItem.title,
             url: `/cases/${caseItem.slug}`,
           })),
@@ -152,8 +199,8 @@ export function AppSidebar({
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
         {navData.map((section) => (
-          <SidebarGroup key={section.title}>
-            <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+          <SidebarGroup key={section.title ?? section.items[0]?.url ?? "section"}>
+            {section.title ? <SidebarGroupLabel>{section.title}</SidebarGroupLabel> : null}
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
                 {section.items.map((menuItem) => {
@@ -214,6 +261,9 @@ export function AppSidebar({
                                 isActive={isItemActive(pathname, childItem.url)}
                               >
                                 <Link href={childItem.url}>
+                                  {childItem.icon ? (
+                                    <childItem.icon className="size-4" aria-hidden="true" />
+                                  ) : null}
                                   <span>{childItem.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>

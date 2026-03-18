@@ -28,16 +28,36 @@ function extractSlug(payload?: unknown): string | undefined {
   return undefined
 }
 
-function runRevalidate(payload?: {_id?: string; _type?: string; slug?: unknown}) {
-  const paths = ['/', '/cases']
+function extractSection(payload?: unknown): 'cases' | 'designops' | undefined {
+  if (!payload || typeof payload !== 'object') return undefined
+
+  const maybePayload = payload as {section?: unknown}
+
+  if (maybePayload.section === 'cases' || maybePayload.section === 'designops') {
+    return maybePayload.section
+  }
+
+  return undefined
+}
+
+function runRevalidate(payload?: {_id?: string; _type?: string; slug?: unknown; section?: unknown}) {
+  const paths = ['/', '/cases', '/designops']
 
   if (!payload?._type || payload._type === 'avatar') {
     paths.push('/lab/avatars')
   }
 
   const slug = extractSlug(payload)
-  if (slug) {
-    paths.push(`/cases/${slug}`)
+  if (slug && (!payload?._type || payload._type === 'caseStudy')) {
+    const section = extractSection(payload)
+
+    if (section === 'designops') {
+      paths.push(`/designops/${slug}`)
+    } else if (section === 'cases') {
+      paths.push(`/cases/${slug}`)
+    } else {
+      paths.push(`/cases/${slug}`, `/designops/${slug}`)
+    }
   }
 
   paths.forEach((path) => revalidatePath(path))
@@ -66,7 +86,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ok: false, error: 'Unauthorized'}, {status: 401})
   }
 
-  let payload: {_id?: string; _type?: string; slug?: unknown} | undefined
+  let payload: {_id?: string; _type?: string; slug?: unknown; section?: unknown} | undefined
 
   try {
     payload = await request.json()

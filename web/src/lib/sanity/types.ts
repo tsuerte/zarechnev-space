@@ -15,18 +15,15 @@ export type SanityImage = {
   }
 }
 
-export type CaseCategory = {
-  title: string
-  slug?: string
-}
+export type CaseStudySection = 'cases' | 'designops'
 
 export type CaseStudyListItem = {
   _id: string
+  section: CaseStudySection
   title: string
   slug?: string
   excerpt?: string
   publishedAt?: string
-  categories?: CaseCategory[]
   coverImage?: SanityImage
 }
 
@@ -36,11 +33,13 @@ export type CaseStudy = CaseStudyListItem & {
 }
 
 export type SidebarCaseItem = {
+  section: CaseStudySection
   title: string
   slug: string
 }
 
 export type CaseStudySitemapItem = {
+  section: CaseStudySection
   slug: string
   publishedAt?: string
   _updatedAt?: string

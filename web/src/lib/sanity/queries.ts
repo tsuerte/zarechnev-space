@@ -1,9 +1,11 @@
 import groq from 'groq'
 
 export const caseStudiesListQuery = groq`*[
-  _type == "caseStudy"
+  _type == "caseStudy" &&
+  section == "cases"
 ] | order(coalesce(publishedAt, _createdAt) desc) {
   _id,
+  section,
   title,
   "slug": slug.current,
   excerpt,
@@ -18,23 +20,44 @@ export const caseStudiesListQuery = groq`*[
         dimensions {width, height}
       }
     }
-  },
-  "categories": categories[]->{
-    title,
-    "slug": slug.current
   }
 }`
 
-export const caseStudyBySlugQuery = groq`*[_type == "caseStudy" && slug.current == $slug][0] {
+export const designOpsListQuery = groq`*[
+  _type == "caseStudy" &&
+  section == "designops" &&
+  defined(slug.current)
+] | order(coalesce(publishedAt, _createdAt) desc) {
   _id,
+  section,
   title,
   "slug": slug.current,
   excerpt,
   publishedAt,
-  "categories": categories[]->{
-    title,
-    "slug": slug.current
-  },
+  coverImage {
+    alt,
+    caption,
+    asset->{
+      url,
+      metadata {
+        lqip,
+        dimensions {width, height}
+      }
+    }
+  }
+}`
+
+export const caseStudyBySlugAndSectionQuery = groq`*[
+  _type == "caseStudy" &&
+  slug.current == $slug &&
+  section == $section
+][0] {
+  _id,
+  section,
+  title,
+  "slug": slug.current,
+  excerpt,
+  publishedAt,
   coverImage {
     alt,
     caption,
@@ -68,12 +91,31 @@ export const caseStudyBySlugQuery = groq`*[_type == "caseStudy" && slug.current 
   }
 }`
 
-export const caseStudySlugsQuery = groq`*[_type == "caseStudy" && defined(slug.current)]{"slug": slug.current}`
+export const caseStudySlugsQuery = groq`*[
+  _type == "caseStudy" &&
+  defined(slug.current) &&
+  section == "cases"
+]{"slug": slug.current}`
+
+export const designOpsSlugsQuery = groq`*[
+  _type == "caseStudy" &&
+  defined(slug.current) &&
+  section == "designops"
+]{"slug": slug.current}`
+
+export const caseStudyPathBySlugQuery = groq`*[
+  _type == "caseStudy" &&
+  slug.current == $slug
+][0]{
+  "slug": slug.current,
+  section
+}`
 
 export const caseStudySitemapQuery = groq`*[
   _type == "caseStudy" &&
   defined(slug.current)
 ]{
+  section,
   "slug": slug.current,
   publishedAt,
   _updatedAt
@@ -83,11 +125,7 @@ export const sidebarCaseItemsQuery = groq`*[
   _type == "caseStudy" &&
   defined(slug.current)
 ] | order(coalesce(publishedAt, _createdAt) desc) {
-  title,
-  "slug": slug.current
-}`
-
-export const categoriesQuery = groq`*[_type == "category"] | order(title asc) {
+  section,
   title,
   "slug": slug.current
 }`

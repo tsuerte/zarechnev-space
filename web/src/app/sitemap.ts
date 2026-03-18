@@ -22,10 +22,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${SITE_URL}/designops`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
   ]
 
   const caseRoutes: MetadataRoute.Sitemap = caseStudies.map((item) => ({
-    url: `${SITE_URL}/cases/${item.slug}`,
+    url: `${SITE_URL}/${item.section === "designops" ? "designops" : "cases"}/${item.slug}`,
     lastModified: item._updatedAt ? new Date(item._updatedAt) : now,
     changeFrequency: "weekly",
     priority: 0.8,
@@ -33,4 +39,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...caseRoutes]
 }
-

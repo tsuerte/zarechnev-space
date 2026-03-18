@@ -1,0 +1,4 @@
+interface:
+  display_name: "Icons"
+  short_description: "Support for the /lab/icons catalog and sync flow"
+  default_prompt: "Use $icons to work on the /lab/icons feature, public icon catalog UI, local icon storage, or Figma sync boundary."

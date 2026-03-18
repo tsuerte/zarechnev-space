@@ -9,7 +9,7 @@ export {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/ui-kit/breadcrumb"
 export { Button, buttonVariants } from "@/ui-kit/button"
 export {
   Card,

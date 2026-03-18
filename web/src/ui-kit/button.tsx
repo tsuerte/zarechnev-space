@@ -14,7 +14,10 @@ function Button({
 }: React.ComponentProps<typeof BaseButton>) {
   return (
     <BaseButton
-      className={cn("font-normal rounded-[var(--radius-md)]", className)}
+      className={cn(
+        "font-normal rounded-[var(--radius-md)] cursor-pointer data-[variant=default]:hover:bg-primary/80 disabled:cursor-default",
+        className
+      )}
       {...props}
     />
   )
@@ -23,7 +26,10 @@ function Button({
 function buttonVariants(
   ...args: Parameters<typeof baseButtonVariants>
 ) {
-  return cn(baseButtonVariants(...args), "font-normal rounded-[var(--radius-md)]")
+  return cn(
+    baseButtonVariants(...args),
+    "font-normal rounded-[var(--radius-md)] cursor-pointer data-[variant=default]:hover:bg-primary/80 disabled:cursor-default"
+  )
 }
 
 export { Button, buttonVariants }

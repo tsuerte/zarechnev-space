@@ -27,7 +27,7 @@ function ToggleGroupItem({
   return (
     <BaseToggleGroupItem
       className={cn(
-        "rounded-[var(--radius-md)] group-data-[spacing=0]/toggle-group:rounded-none group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-l-[var(--radius-md)] group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-t-[var(--radius-md)] group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-r-[var(--radius-md)] group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-b-[var(--radius-md)] font-normal",
+        "rounded-[var(--radius-md)] group-data-[spacing=0]/toggle-group:rounded-none group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-l-[var(--radius-md)] group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-t-[var(--radius-md)] group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-r-[var(--radius-md)] group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-b-[var(--radius-md)] font-normal cursor-pointer disabled:cursor-default",
         className
       )}
       {...props}

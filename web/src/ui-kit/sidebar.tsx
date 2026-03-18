@@ -102,7 +102,13 @@ function SidebarGroupLabel({
 }
 
 function SidebarGroupAction(props: React.ComponentProps<typeof BaseSidebarGroupAction>) {
-  return <BaseSidebarGroupAction {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseSidebarGroupAction
+      className={cn("cursor-pointer", className)}
+      {...restProps}
+    />
+  )
 }
 
 function SidebarGroupContent(props: React.ComponentProps<typeof BaseSidebarGroupContent>) {
@@ -129,7 +135,7 @@ function SidebarMenuButton({
   return (
     <BaseSidebarMenuButton
       className={cn(
-        "data-[active=true]:font-normal",
+        "data-[active=true]:font-normal cursor-pointer disabled:cursor-default aria-disabled:cursor-default",
         sidebarMenuButtonAppearanceClasses[appearance],
         sidebarMenuButtonOpenToneClasses[openTone],
         className
@@ -140,7 +146,13 @@ function SidebarMenuButton({
 }
 
 function SidebarMenuAction(props: React.ComponentProps<typeof BaseSidebarMenuAction>) {
-  return <BaseSidebarMenuAction {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseSidebarMenuAction
+      className={cn("cursor-pointer", className)}
+      {...restProps}
+    />
+  )
 }
 
 function SidebarMenuBadge({
@@ -163,7 +175,16 @@ function SidebarMenuSubItem(props: React.ComponentProps<typeof BaseSidebarMenuSu
 }
 
 function SidebarMenuSubButton(props: React.ComponentProps<typeof BaseSidebarMenuSubButton>) {
-  return <BaseSidebarMenuSubButton {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseSidebarMenuSubButton
+      className={cn(
+        "cursor-pointer disabled:cursor-default aria-disabled:cursor-default",
+        className
+      )}
+      {...restProps}
+    />
+  )
 }
 
 export {

@@ -17,7 +17,12 @@ function TabsTrigger({
   className,
   ...props
 }: React.ComponentProps<typeof BaseTabsTrigger>) {
-  return <BaseTabsTrigger className={cn("font-normal", className)} {...props} />
+  return (
+    <BaseTabsTrigger
+      className={cn("font-normal cursor-pointer disabled:cursor-default", className)}
+      {...props}
+    />
+  )
 }
 
 function TabsContent({

@@ -42,13 +42,25 @@ function DropdownMenuGroup(props: React.ComponentProps<typeof BaseDropdownMenuGr
 }
 
 function DropdownMenuItem(props: React.ComponentProps<typeof BaseDropdownMenuItem>) {
-  return <BaseDropdownMenuItem {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseDropdownMenuItem
+      className={cn("cursor-pointer data-disabled:cursor-default", className)}
+      {...restProps}
+    />
+  )
 }
 
 function DropdownMenuCheckboxItem(
   props: React.ComponentProps<typeof BaseDropdownMenuCheckboxItem>
 ) {
-  return <BaseDropdownMenuCheckboxItem {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseDropdownMenuCheckboxItem
+      className={cn("cursor-pointer data-disabled:cursor-default", className)}
+      {...restProps}
+    />
+  )
 }
 
 function DropdownMenuRadioGroup(
@@ -60,7 +72,13 @@ function DropdownMenuRadioGroup(
 function DropdownMenuRadioItem(
   props: React.ComponentProps<typeof BaseDropdownMenuRadioItem>
 ) {
-  return <BaseDropdownMenuRadioItem {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseDropdownMenuRadioItem
+      className={cn("cursor-pointer data-disabled:cursor-default", className)}
+      {...restProps}
+    />
+  )
 }
 
 function DropdownMenuLabel({
@@ -101,7 +119,13 @@ function DropdownMenuSubContent(
 function DropdownMenuSubTrigger(
   props: React.ComponentProps<typeof BaseDropdownMenuSubTrigger>
 ) {
-  return <BaseDropdownMenuSubTrigger {...props} />
+  const { className, ...restProps } = props
+  return (
+    <BaseDropdownMenuSubTrigger
+      className={cn("cursor-pointer data-disabled:cursor-default", className)}
+      {...restProps}
+    />
+  )
 }
 
 export {

@@ -47,7 +47,6 @@ export type IconVariantDetail = Omit<
   IconVariantRecord,
   "sourceFileName" | "optimizedFileName" | "optimizedHash"
 > & {
-  svgSource: string
   svgOptimized: string
 }
 
@@ -67,6 +66,27 @@ export function createCatalogNodeKey(fileKey: string, nodeId: string) {
 
 export function createFigmaNodeUrl(fileKey: string, nodeId: string) {
   return `https://www.figma.com/design/${fileKey}/source?node-id=${encodeURIComponent(nodeId.replace(/:/g, "-"))}`
+}
+
+function sanitizePublicFileNameSegment(value: string) {
+  const normalized = value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[<>:"/\\|?*\x00-\x1F]+/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+
+  return normalized || "icon"
+}
+
+export function createPublicIconFileName(displayName: string, variantLabel: string) {
+  const fileName = [displayName, variantLabel]
+    .map(sanitizePublicFileNameSegment)
+    .filter(Boolean)
+    .join("-")
+
+  return `${fileName || "icon"}.svg`
 }
 
 export function splitIconFullName(fullName: string) {

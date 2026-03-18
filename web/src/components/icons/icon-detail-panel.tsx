@@ -4,7 +4,11 @@ import { Copy, Download, FileCode2 } from "lucide-react"
 import Image from "next/image"
 import { useMemo, useState } from "react"
 
-import { createFigmaNodeUrl, type IconFamilyDetail } from "@/lib/icons/types"
+import {
+  createFigmaNodeUrl,
+  createPublicIconFileName,
+  type IconFamilyDetail,
+} from "@/lib/icons/types"
 import { createSvgPreviewUrl } from "@/lib/svg/client"
 import { Badge, Button, Separator } from "@/ui-kit"
 
@@ -13,7 +17,7 @@ function downloadSvg(fileName: string, svg: string) {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url
-  anchor.download = `${fileName}.svg`
+  anchor.download = fileName
   anchor.click()
   URL.revokeObjectURL(url)
 }
@@ -81,7 +85,7 @@ export function IconDetailPanel({
   }
 
   const figmaUrl = createFigmaNodeUrl(icon.figmaFileKey, icon.familyNodeId)
-  const downloadName = `${icon.displayName}-${selectedVariant.label}`.replace(/\s+/g, "-")
+  const downloadName = createPublicIconFileName(icon.displayName, selectedVariant.label)
 
   return (
     <aside className="w-[360px] shrink-0 border-l bg-background">

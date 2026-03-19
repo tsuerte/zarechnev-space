@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   Input,
   Label,
   Separator,
@@ -82,6 +83,7 @@ function renderOptionField(
 export function ZalivatorWorkspace() {
   const [generator, setGenerator] = useState<ZalivatorGeneratorId>("name")
   const [quantity, setQuantity] = useState(10)
+  const [unique, setUnique] = useState(false)
   const [options, setOptions] = useState<Record<string, string>>(() => buildDefaultOptions("name"))
   const [result, setResult] = useState<ZalivatorGenerateResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -92,6 +94,7 @@ export function ZalivatorWorkspace() {
   const handleGeneratorChange = (nextGenerator: ZalivatorGeneratorId) => {
     setGenerator(nextGenerator)
     setOptions(buildDefaultOptions(nextGenerator))
+    setUnique(false)
     setResult(null)
     setError(null)
   }
@@ -120,6 +123,7 @@ export function ZalivatorWorkspace() {
         body: JSON.stringify({
           generator,
           quantity,
+          unique,
           options: payloadOptions,
         }),
       })
@@ -158,6 +162,23 @@ export function ZalivatorWorkspace() {
 
           <Separator />
           <ZalivatorQuantityControl value={quantity} onChange={setQuantity} />
+
+          {metadata.supportsUnique ? (
+            <section className="flex items-start gap-3">
+              <Checkbox
+                id="zalivator-unique"
+                checked={unique}
+                onCheckedChange={(checked) => setUnique(checked === true)}
+                className="mt-0.5"
+              />
+              <div className="space-y-1">
+                <Label htmlFor="zalivator-unique">Только уникальные</Label>
+                <p className="text-sm leading-5 text-muted-foreground">
+                  Значения не будут повторяться внутри одного набора.
+                </p>
+              </div>
+            </section>
+          ) : null}
 
           <Button onClick={handleGenerate} disabled={isPending} className="w-full">
             {isPending ? "Генерация..." : "Сгенерировать"}

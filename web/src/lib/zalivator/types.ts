@@ -3,6 +3,7 @@ export type ZalivatorGeneratorId = "name" | "mobilePhone" | "email"
 export type ZalivatorGenerateRequest = {
   generator: ZalivatorGeneratorId
   quantity: number
+  unique?: boolean
   options?: Record<string, unknown>
 }
 
@@ -10,6 +11,7 @@ export type ZalivatorGenerateResponse = {
   kind: "text"
   generator: ZalivatorGeneratorId
   quantity: number
+  unique: boolean
   values: string[]
 }
 
@@ -42,6 +44,7 @@ export type ZalivatorGeneratorMetadata = {
   label: string
   description: string
   kind: "text"
+  supportsUnique: boolean
   optionFields: ZalivatorOptionField[]
 }
 

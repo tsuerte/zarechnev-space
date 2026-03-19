@@ -16,6 +16,7 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
     label: "Имя",
     description: "Русское имя и ФИО в выбранном текстовом формате.",
     kind: "text",
+    supportsUnique: true,
     optionFields: [
       {
         key: "format",
@@ -45,6 +46,7 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
     label: "Моб. телефон",
     description: "Российский мобильный номер в текстовом виде.",
     kind: "text",
+    supportsUnique: true,
     optionFields: [
       {
         key: "format",
@@ -62,6 +64,7 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
     label: "Эл. почта",
     description: "Email-адрес для макетов и прототипов.",
     kind: "text",
+    supportsUnique: true,
     optionFields: [
       {
         key: "domain",

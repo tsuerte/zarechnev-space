@@ -20,6 +20,7 @@ export {
   CardHeader,
   CardTitle,
 } from "@/ui-kit/card"
+export { Checkbox } from "@/ui-kit/checkbox"
 export {
   DropdownMenu,
   DropdownMenuCheckboxItem,

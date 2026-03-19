@@ -34,16 +34,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Поле "quantity" должно быть целым числом.' }, { status: 400 })
   }
 
+  if (payload.unique !== undefined && typeof payload.unique !== "boolean") {
+    return NextResponse.json({ error: 'Поле "unique" должно быть булевым значением.' }, { status: 400 })
+  }
+
   if (payload.options !== undefined && !isPlainObject(payload.options)) {
     return NextResponse.json({ error: 'Поле "options" должно быть объектом.' }, { status: 400 })
   }
 
   const quantity = payload.quantity as number
+  const unique = payload.unique as boolean | undefined
   const options = payload.options as Record<string, unknown> | undefined
 
   const generateRequest: ZalivatorGenerateRequest = {
     generator: payload.generator,
     quantity,
+    unique,
     options,
   }
 

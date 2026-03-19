@@ -19,6 +19,7 @@ test("POST /api/zalivator/generate returns text values for a valid request", asy
     createGenerateRequest({
       generator: "email",
       quantity: 2,
+      unique: true,
       options: {
         domain: "mail.ru",
       },
@@ -31,14 +32,17 @@ test("POST /api/zalivator/generate returns text values for a valid request", asy
     kind: string
     generator: string
     quantity: number
+    unique: boolean
     values: string[]
   }
 
   assert.equal(payload.kind, "text")
   assert.equal(payload.generator, "email")
   assert.equal(payload.quantity, 2)
+  assert.equal(payload.unique, true)
   assert.equal(payload.values.length, 2)
   assert.ok(payload.values.every((value) => value.endsWith("@mail.ru")))
+  assert.equal(new Set(payload.values).size, payload.values.length)
 })
 
 test("POST /api/zalivator/generate rejects non-object options", async () => {
@@ -57,6 +61,22 @@ test("POST /api/zalivator/generate rejects non-object options", async () => {
   assert.match(payload.error, /options/)
 })
 
+test('POST /api/zalivator/generate rejects non-boolean "unique"', async () => {
+  const response = await POST(
+    createGenerateRequest({
+      generator: "name",
+      quantity: 1,
+      unique: "yes",
+    })
+  )
+
+  assert.equal(response.status, 400)
+
+  const payload = (await response.json()) as { error: string }
+
+  assert.match(payload.error, /unique/)
+})
+
 test("GET /api/zalivator/generators returns discovery metadata", async () => {
   const response = await GET()
 
@@ -65,7 +85,7 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
   const payload = (await response.json()) as {
     generateEndpoint: string
     quantity: { min: number; max: number; presets: number[] }
-    generators: Array<{ id: string; label: string }>
+    generators: Array<{ id: string; label: string; supportsUnique: boolean }>
   }
 
   assert.equal(payload.generateEndpoint, "/api/zalivator/generate")
@@ -74,4 +94,5 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
     payload.generators.map((generator) => generator.id),
     ["name", "mobilePhone", "email"]
   )
+  assert.ok(payload.generators.every((generator) => generator.supportsUnique === true))
 })

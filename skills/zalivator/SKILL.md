@@ -62,6 +62,7 @@ The current public response is text-first:
 - `kind`
 - `generator`
 - `quantity`
+- `unique`
 - `values: string[]`
 
 Do not add object-heavy payloads back into the main public response unless the product explicitly needs them.
@@ -76,6 +77,7 @@ Do not add object-heavy payloads back into the main public response unless the p
   - `label`
   - `description`
   - `kind`
+  - `supportsUnique`
   - `optionFields`
 
 Use discovery metadata for web and future plugin configuration UIs.
@@ -94,8 +96,11 @@ Use discovery metadata for web and future plugin configuration UIs.
 
 Route and executor rules:
 - non-object `options` must fail with `400`
+- non-boolean `unique` must fail with `400`
 - unknown option keys must fail fast
 - bad enum/type values must fail fast
+- `unique: true` means values must be unique within one batch by final text value
+- if a unique batch cannot be assembled, executor must fail with a clear error
 
 ## Architecture Guardrails
 

@@ -1,0 +1,4 @@
+version: 1
+agent:
+  short_description: "Support for the /lab/zalivator text generator"
+  default_prompt: "Use $zalivator to work on the /lab/zalivator text-output generator, its API, or the future Figma plugin integration."

@@ -47,6 +47,20 @@ export default function LabPage() {
             Загрузите файл или вставьте SVG из буфера.
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/lab/zalivator" className="hover:underline">
+                Zalivator
+              </Link>
+            </CardTitle>
+            <CardDescription>Генератор текстовых мок-данных для плагина.</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            Стартовый `v1` для имени, мобильного телефона и email.
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

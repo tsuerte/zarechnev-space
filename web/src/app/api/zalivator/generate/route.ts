@@ -1,0 +1,59 @@
+import { NextResponse } from "next/server"
+
+import { executeZalivatorGenerateRequest } from "@/lib/zalivator/executor"
+import type { ZalivatorGenerateRequest, ZalivatorGeneratorId } from "@/lib/zalivator/types"
+
+const GENERATORS: ZalivatorGeneratorId[] = ["name", "mobilePhone", "email"]
+
+function isGeneratorId(value: unknown): value is ZalivatorGeneratorId {
+  return typeof value === "string" && GENERATORS.includes(value as ZalivatorGeneratorId)
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+export async function POST(request: Request) {
+  let payload: unknown
+
+  try {
+    payload = await request.json()
+  } catch {
+    return NextResponse.json({ error: "Некорректный JSON в теле запроса." }, { status: 400 })
+  }
+
+  if (!isPlainObject(payload)) {
+    return NextResponse.json({ error: "Тело запроса должно быть объектом." }, { status: 400 })
+  }
+
+  if (!isGeneratorId(payload.generator)) {
+    return NextResponse.json({ error: 'Поле "generator" имеет недопустимое значение.' }, { status: 400 })
+  }
+
+  if (!Number.isInteger(payload.quantity)) {
+    return NextResponse.json({ error: 'Поле "quantity" должно быть целым числом.' }, { status: 400 })
+  }
+
+  if (payload.options !== undefined && !isPlainObject(payload.options)) {
+    return NextResponse.json({ error: 'Поле "options" должно быть объектом.' }, { status: 400 })
+  }
+
+  const quantity = payload.quantity as number
+  const options = payload.options as Record<string, unknown> | undefined
+
+  const generateRequest: ZalivatorGenerateRequest = {
+    generator: payload.generator,
+    quantity,
+    options,
+  }
+
+  try {
+    const response = executeZalivatorGenerateRequest(generateRequest)
+    return NextResponse.json(response)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось сгенерировать значения."
+
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
+}

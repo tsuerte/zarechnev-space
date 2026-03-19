@@ -31,7 +31,6 @@ const segmentLabels: Record<string, string> = {
   avatars: "Аватары",
   icons: "Иконки",
   svg: "SVG Optimizer",
-  zalivator: "Zalivator",
 }
 
 function humanizeSegment(segment: string) {
@@ -77,7 +76,7 @@ type AppShellProps = {
 
 export function AppShell({ children, sidebarCaseItems }: AppShellProps) {
   const pathname = usePathname()
-  const isFramelessPage = pathname === "/lab/zalivator" || pathname === "/lab/icons"
+  const isFramelessPage = pathname === "/lab/icons"
   const caseTitleByPath = useMemo(
     () =>
       new Map(

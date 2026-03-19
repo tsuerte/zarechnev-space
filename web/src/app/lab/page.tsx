@@ -47,20 +47,6 @@ export default function LabPage() {
             Загрузите файл или вставьте SVG из буфера.
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Link href="/lab/zalivator" className="hover:underline">
-                Zalivator
-              </Link>
-            </CardTitle>
-            <CardDescription>Генератор мок-данных для макетов и прототипов.</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            В разработке.
-          </CardContent>
-        </Card>
       </section>
     </main>
   )

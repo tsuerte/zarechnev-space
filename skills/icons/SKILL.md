@@ -24,16 +24,19 @@ Primary files:
 - `web/src/components/icons/icons-grid.tsx`
 - `web/src/components/icons/icon-card.tsx`
 - `web/src/components/icons/icon-detail-panel.tsx`
+- `web/src/lib/icons/preview.ts`
 - `web/src/lib/icons/config.ts`
 - `web/src/lib/icons/storage.ts`
 - `web/src/lib/icons/sync.ts`
 - `web/src/lib/icons/types.ts`
 - `web/scripts/icons-sync.ts`
 - `web/src/lib/figma/client.ts`
+- `web/src/ui-kit/slider.tsx`
 - `web/data/icons/index.json`
 - `web/data/icons/source/*`
 - `web/data/icons/optimized/*`
 - `web/tests/icons-types.test.ts`
+- `web/tests/icons-preview.test.ts`
 
 ## Current Feature Contract
 
@@ -46,6 +49,14 @@ Primary files:
   - `web/data/icons/optimized/*.svg`
 - The public UI must expose canonical optimized SVG only.
 - Source SVG is internal-only and must not leak into the public web contract.
+- The page has preview-only controls for:
+  - `size`
+  - `strokeWidth`
+  - `color`
+- These controls change preview rendering only. They must not alter:
+  - canonical stored SVG
+  - copy payloads
+  - download payloads
 - The detail panel may link back to the Figma source node, but it must not expose raw source SVG bytes.
 - Manual upload is gone. Do not reintroduce it unless explicitly requested.
 
@@ -60,8 +71,13 @@ Primary files:
    - write synced files and metadata
 4. `page.tsx` loads public summaries and the first selected detail server-side.
 5. `actions.ts` loads detail payloads for later selection changes.
-6. `icons-workspace.tsx` is the client shell for search, selection, and detail loading.
-7. `icon-detail-panel.tsx` is the public detail UI and download/copy surface.
+6. `icons-workspace.tsx` is the client shell for search, selection, detail loading, and page-level preview state.
+7. `icons-toolbar.tsx` owns the public preview controls surface for query, size, stroke width, and color.
+8. `preview.ts` owns preview-only SVG transformation rules and preview control bounds.
+9. `icons-grid.tsx` + `icon-card.tsx` render the catalog:
+   - fixed `140x140` cards
+   - inline SVG preview in the grid
+10. `icon-detail-panel.tsx` is the public detail UI and canonical download/copy surface.
 
 ## Guardrails
 
@@ -70,6 +86,8 @@ Primary files:
 - Keep the canonical/source separation intact:
   - source SVG stays on disk for sync internals
   - optimized SVG is the only public copy/download target
+- Treat `size`, `strokeWidth`, and `color` as preview state only.
+- Do not silently expand preview controls into "export customized icon" behavior unless explicitly requested.
 - App code must import UI only from `@/ui-kit`.
 - Prefer usage-level changes for icon-catalog-specific UI.
 - Use `ui-kit` only when the change is shared policy outside the icons catalog.
@@ -84,7 +102,13 @@ Primary files:
   - `web/src/components/icons/icons-toolbar.tsx`
   - `web/src/components/icons/icons-grid.tsx`
   - `web/src/components/icons/icon-detail-panel.tsx`
+- Preview-only SVG transformation belongs in `web/src/lib/icons/preview.ts`.
 - Keep the public UI centered on canonical SVG, not source internals.
+- Grid preview currently renders inline SVG, not `<img>`. Do not regress that unless there is a clear reason.
+- The catalog card model is currently:
+  - fixed `140x140`
+  - icon above label
+  - preview size changes must not resize the card itself
 
 ### Storage or DTO changes
 
@@ -103,6 +127,7 @@ Primary files:
 
 - Keep public filename logic centralized in `web/src/lib/icons/types.ts`.
 - Do not rebuild filename sanitation ad hoc inside UI components.
+- Preview customizations must not leak into copy/download unless the user explicitly asks for customized exports.
 
 ## Known Pitfalls
 
@@ -110,12 +135,15 @@ Primary files:
 - The sync lock is file-based. If sync crashes mid-run, stale lock cleanup may still require manual attention.
 - Sync writes files before metadata is rewritten, so storage-level changes need careful review.
 - The catalog payload can get heavy because summaries load optimized preview SVG and detail views load optimized SVG per variant.
-- Test coverage exists for helper logic, but not for the full sync/storage pipeline.
+- The grid now uses inline SVG preview and the detail panel still uses image/data-url preview. Be explicit if you change that asymmetry.
+- Preview controls can cause broad rerenders across the grid. Be careful with rendering strategy before adding more live controls.
+- Test coverage exists for helper logic and preview helpers, but not for the full sync/storage pipeline.
 
 ## Validation
 
 - Web or UI changes: run `npm run check` in `web`.
 - If you change icon helpers, keep `web/tests/icons-types.test.ts` green or replace it with equivalent coverage.
+- If you change preview helpers or preview control bounds, keep `web/tests/icons-preview.test.ts` green or replace it with equivalent coverage.
 - If you change sync behavior or canonical SVG output, review likely impact on `/lab/svg` and the shared pipeline.
 
 ## Stop And Ask

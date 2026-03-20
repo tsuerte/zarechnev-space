@@ -1,6 +1,15 @@
 "use client"
 
-import { AtSign, Building2, IdCard, Smartphone, UserRound } from "lucide-react"
+import {
+  AtSign,
+  Building2,
+  CreditCard,
+  FileDigit,
+  IdCard,
+  BriefcaseBusiness,
+  Smartphone,
+  UserRound,
+} from "lucide-react"
 
 import { Label, ToggleGroup, ToggleGroupItem } from "@/ui-kit"
 import { listZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
@@ -22,6 +31,10 @@ export function ZalivatorGeneratorPicker({
     email: AtSign,
     snils: IdCard,
     city: Building2,
+    organizationName: Building2,
+    inn: FileDigit,
+    kpp: CreditCard,
+    position: BriefcaseBusiness,
   } as const
 
   return (

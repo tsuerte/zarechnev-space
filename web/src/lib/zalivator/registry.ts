@@ -1,15 +1,23 @@
 import { generateCity } from "@/lib/zalivator/generators/text/city"
 import { generateEmail } from "@/lib/zalivator/generators/text/email"
+import { generateInn } from "@/lib/zalivator/generators/text/inn"
+import { generateKpp } from "@/lib/zalivator/generators/text/kpp"
 import { generateMobilePhone } from "@/lib/zalivator/generators/text/mobile-phone"
 import { generateName } from "@/lib/zalivator/generators/text/name"
+import { generateOrganizationName } from "@/lib/zalivator/generators/text/organization-name"
+import { generatePosition } from "@/lib/zalivator/generators/text/position"
 import { generateSnils } from "@/lib/zalivator/generators/text/snils"
 import {
   normalizeEmailOptions,
+  normalizeInnOptions,
   normalizeMobilePhoneOptions,
   normalizeNameOptions,
+  normalizePositionOptions,
   type ZalivatorEmailOptions,
+  type ZalivatorInnOptions,
   type ZalivatorMobilePhoneOptions,
   type ZalivatorNameOptions,
+  type ZalivatorPositionOptions,
 } from "@/lib/zalivator/options"
 import type {
   ZalivatorGeneratorDefinition,
@@ -45,6 +53,26 @@ export const ZALIVATOR_GENERATOR_REGISTRY: Record<
     id: "city",
     normalizeOptions: () => ({}),
     generateValue: () => generateCity(),
+  },
+  organizationName: {
+    id: "organizationName",
+    normalizeOptions: () => ({}),
+    generateValue: () => generateOrganizationName(),
+  },
+  inn: {
+    id: "inn",
+    normalizeOptions: normalizeInnOptions,
+    generateValue: (options) => generateInn(options as ZalivatorInnOptions),
+  },
+  kpp: {
+    id: "kpp",
+    normalizeOptions: () => ({}),
+    generateValue: () => generateKpp(),
+  },
+  position: {
+    id: "position",
+    normalizeOptions: normalizePositionOptions,
+    generateValue: (options) => generatePosition(options as ZalivatorPositionOptions),
   },
 }
 

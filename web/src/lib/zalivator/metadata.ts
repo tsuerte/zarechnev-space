@@ -91,6 +91,62 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
     supportsUnique: true,
     optionFields: [],
   },
+  organizationName: {
+    id: "organizationName",
+    label: "Название орг.",
+    description: "Название организации в коротком текстовом виде.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [],
+  },
+  inn: {
+    id: "inn",
+    label: "ИНН",
+    description: "ИНН физлица или юрлица с корректной контрольной цифрой.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [
+      {
+        key: "kind",
+        label: "Тип",
+        control: "segmented",
+        options: [
+          { value: "legal", label: "Юрлицо" },
+          { value: "physical", label: "Физлицо" },
+        ],
+      },
+    ],
+  },
+  kpp: {
+    id: "kpp",
+    label: "КПП",
+    description: "Код причины постановки на учет в текстовом формате.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [],
+  },
+  position: {
+    id: "position",
+    label: "Должность",
+    description: "Должность из выбранного профессионального домена.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [
+      {
+        key: "domain",
+        label: "Домен",
+        control: "segmented",
+        options: [
+          { value: "any", label: "Любая" },
+          { value: "it", label: "IT" },
+          { value: "fintech", label: "Финтех" },
+          { value: "construction", label: "Строительство" },
+          { value: "retail", label: "Ритейл" },
+          { value: "logistics", label: "Логистика" },
+        ],
+      },
+    ],
+  },
 }
 
 export function listZalivatorGeneratorMetadata() {

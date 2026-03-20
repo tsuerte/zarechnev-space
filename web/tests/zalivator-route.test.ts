@@ -114,7 +114,17 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
   assert.deepEqual(payload.quantity.presets, [1, 5, 10])
   assert.deepEqual(
     payload.generators.map((generator) => generator.id),
-    ["name", "mobilePhone", "email", "snils", "city"]
+    [
+      "name",
+      "mobilePhone",
+      "email",
+      "snils",
+      "city",
+      "organizationName",
+      "inn",
+      "kpp",
+      "position",
+    ]
   )
   assert.ok(payload.generators.every((generator) => generator.supportsUnique === true))
 })

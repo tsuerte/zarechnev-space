@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server"
 
 import { executeZalivatorGenerateRequest } from "@/lib/zalivator/executor"
+import { listZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
 import type { ZalivatorGenerateRequest, ZalivatorGeneratorId } from "@/lib/zalivator/types"
 
-const GENERATORS: ZalivatorGeneratorId[] = ["name", "mobilePhone", "email", "snils", "city"]
+const GENERATORS = new Set<ZalivatorGeneratorId>(
+  listZalivatorGeneratorMetadata().map((generator) => generator.id)
+)
 
 function isGeneratorId(value: unknown): value is ZalivatorGeneratorId {
-  return typeof value === "string" && GENERATORS.includes(value as ZalivatorGeneratorId)
+  return typeof value === "string" && GENERATORS.has(value as ZalivatorGeneratorId)
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

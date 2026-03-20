@@ -3,8 +3,18 @@ import assert from "node:assert/strict"
 
 import { generateCity } from "../src/lib/zalivator/generators/text/city"
 import { generateEmail } from "../src/lib/zalivator/generators/text/email"
+import {
+  calculateInnCheckDigits,
+  generateInn,
+} from "../src/lib/zalivator/generators/text/inn"
+import { generateKpp } from "../src/lib/zalivator/generators/text/kpp"
 import { generateMobilePhone } from "../src/lib/zalivator/generators/text/mobile-phone"
 import { generateName } from "../src/lib/zalivator/generators/text/name"
+import { generateOrganizationName } from "../src/lib/zalivator/generators/text/organization-name"
+import {
+  POSITION_BY_DOMAIN,
+  generatePosition,
+} from "../src/lib/zalivator/generators/text/position"
 import {
   calculateSnilsCheckNumber,
   generateSnils,
@@ -58,4 +68,68 @@ test("city generator returns a Russian city name from the built-in list", () => 
   const value = generateCity()
 
   assert.match(value, /^[А-ЯЁ][А-Яа-яё\- ]+$/)
+})
+
+test("organization name generator returns a legal form, entrepreneur, or plain organization name", () => {
+  const values = Array.from({ length: 50 }, () => generateOrganizationName())
+
+  assert.ok(
+    values.every((value) => {
+      return (
+        /^(ООО|АО|ПАО) «.+»$/.test(value) ||
+        /^ИП [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(value) ||
+        /^[А-ЯЁ][А-Яа-яё]+$/.test(value)
+      )
+    })
+  )
+
+  assert.ok(values.some((value) => /^(ООО|АО|ПАО) «.+»$/.test(value)))
+  assert.ok(values.some((value) => /^ИП [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(value)))
+  assert.ok(values.some((value) => /^[А-ЯЁ][А-Яа-яё]+$/.test(value)))
+})
+
+test("inn generator returns correct legal and physical values", () => {
+  const legal = generateInn({ kind: "legal" })
+  const physical = generateInn({ kind: "physical" })
+
+  assert.match(legal, /^\d{10}$/)
+  assert.match(physical, /^\d{12}$/)
+  assert.equal(legal.slice(-1), calculateInnCheckDigits("legal", legal.slice(0, 9)))
+  assert.equal(
+    physical.slice(-2),
+    calculateInnCheckDigits("physical", physical.slice(0, 10))
+  )
+})
+
+test("kpp generator returns a 9-digit format-valid value", () => {
+  const value = generateKpp()
+
+  assert.match(value, /^\d{9}$/)
+})
+
+test("position generator respects selected domain and supports any", () => {
+  const itValues = new Set(
+    Array.from({ length: 20 }, () => generatePosition({ domain: "it" }))
+  )
+  const logisticsValues = new Set(
+    Array.from({ length: 20 }, () => generatePosition({ domain: "logistics" }))
+  )
+  const anyValues = new Set(
+    Array.from({ length: 50 }, () => generatePosition({ domain: "any" }))
+  )
+
+  assert.ok([...itValues].every((value) => !logisticsValues.has(value)))
+  assert.ok(itValues.size > 1)
+  assert.ok(logisticsValues.size > 1)
+  assert.ok([...anyValues].some((value) => itValues.has(value)))
+  assert.ok([...anyValues].some((value) => logisticsValues.has(value)))
+})
+
+test("position generator keeps at least 30 roles in every domain", () => {
+  for (const [domain, positions] of Object.entries(POSITION_BY_DOMAIN)) {
+    assert.ok(
+      positions.length >= 30,
+      `domain "${domain}" should contain at least 30 positions`
+    )
+  }
 })

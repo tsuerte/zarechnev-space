@@ -59,6 +59,10 @@ Implemented generators:
 - `email`
 - `snils`
 - `city`
+- `organizationName`
+- `inn`
+- `kpp`
+- `position`
 
 The current public response is text-first:
 - `kind`
@@ -103,6 +107,26 @@ Use discovery metadata for web and future plugin configuration UIs.
 `city`
 - no options in `v1`
 - can be generated from a fixed built-in list of Russian cities
+
+`organizationName`
+- no options in `v1`
+- can return:
+  - `ООО/АО/ПАО` with `«ёлочки»`
+  - `ИП Фамилия Имя Отчество`
+  - a short plain organization name without legal form
+
+`inn`
+- `kind: "physical" | "legal"`
+- `legal` must return 10 digits with a valid control digit
+- `physical` must return 12 digits with valid control digits
+
+`kpp`
+- no options in `v1`
+- should be format-valid text only; do not invent a fake checksum model
+
+`position`
+- `domain: "any" | "it" | "fintech" | "construction" | "retail" | "logistics"`
+- returns a job title from the selected domain
 
 Route and executor rules:
 - non-object `options` must fail with `400`

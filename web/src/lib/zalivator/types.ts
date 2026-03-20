@@ -4,6 +4,10 @@ export type ZalivatorGeneratorId =
   | "email"
   | "snils"
   | "city"
+  | "organizationName"
+  | "inn"
+  | "kpp"
+  | "position"
 
 export type ZalivatorGenerateRequest = {
   generator: ZalivatorGeneratorId

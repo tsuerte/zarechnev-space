@@ -187,10 +187,21 @@ When that happens:
 ## UI Guidance
 
 - Treat `/lab/zalivator` as an operator-facing tool, not a demo page.
-- Prefer a compact control panel on the left and a dedicated result workspace on the right.
+- Prefer a three-column desktop layout:
+  - left sidebar with all generator types visible at once
+  - central settings panel for generator-specific and shared controls
+  - right result workspace
+- Keep the workspace visually plain and tool-like: avoid invented uppercase section headers, decorative shadows, and extra chrome that is not present in shadcn / Vercel / v0 patterns.
 - Prefer stock `ui-kit` control sizes and spacing over decorative local overrides.
 - Keep generator and option selection close to standard `ToggleGroup` / `Input` / `Label` patterns unless a stronger reason exists.
 - Prefer `Select` over wrapped segmented controls when the choice list gets long or visually noisy.
 - For generator-specific option UIs, metadata should stay expressive enough to drive `select`, `number`, `checkbox-group`, and `textarea` controls without hardcoding generator-specific React branches.
+- Do not hide the generator list behind a dropdown when the desktop layout can show the full set inline.
+- Prefer auto-generation in the web UI:
+  - trigger immediately for discrete controls like list selections, toggles, selects, and checkboxes
+  - debounce freeform text/number/textarea input
+  - cancel stale in-flight requests
+  - prefer no primary generate CTA when auto-run is stable
+  - surface loading/error status in the result workspace instead of duplicating it in the settings column
 - Keep result presentation centered on fast scanning and fast copying.
 - Row-level copy actions are acceptable for text outputs; avoid reintroducing JSON-first result UX.

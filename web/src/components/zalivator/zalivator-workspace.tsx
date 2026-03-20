@@ -1,9 +1,8 @@
 "use client"
 
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 
 import {
-  Button,
   Card,
   CardContent,
   Checkbox,
@@ -32,6 +31,12 @@ import { ZalivatorQuantityControl } from "@/components/zalivator/zalivator-quant
 import { ZalivatorResultList } from "@/components/zalivator/zalivator-result-list"
 
 type ZalivatorOptionValue = string | string[]
+type ZalivatorAutoRunMode = "immediate" | "debounced"
+const ZALIVATOR_AUTO_RUN_DEBOUNCE_MS = 400
+
+function isAbortError(cause: unknown) {
+  return cause instanceof Error && cause.name === "AbortError"
+}
 
 function resolveFieldChoices(
   field: ZalivatorOptionField,
@@ -103,7 +108,7 @@ function renderOptionField(
   field: ZalivatorOptionField,
   value: unknown,
   currentValues: Record<string, ZalivatorOptionValue>,
-  onChange: (key: string, value: ZalivatorOptionValue) => void
+  onChange: (key: string, value: ZalivatorOptionValue, mode?: ZalivatorAutoRunMode) => void
 ) {
   if (!isFieldVisible(field, currentValues)) {
     return null
@@ -116,7 +121,7 @@ function renderOptionField(
           <Label>{field.label}</Label>
           <ChoiceList
             value={typeof value === "string" ? value : undefined}
-            onValueChange={(nextValue) => onChange(field.key, nextValue)}
+            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
             options={field.options}
           />
         </div>
@@ -133,7 +138,7 @@ function renderOptionField(
           value={typeof value === "string" ? value : undefined}
           onValueChange={(nextValue) => {
             if (nextValue) {
-              onChange(field.key, nextValue)
+              onChange(field.key, nextValue, "immediate")
             }
           }}
           className="flex flex-wrap justify-start"
@@ -155,7 +160,7 @@ function renderOptionField(
           <Label>{field.label}</Label>
           <ChoiceList
             value={typeof value === "string" ? value : undefined}
-            onValueChange={(nextValue) => onChange(field.key, nextValue)}
+            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
             options={field.options}
           />
         </div>
@@ -167,7 +172,7 @@ function renderOptionField(
         <Label>{field.label}</Label>
         <Select
           value={typeof value === "string" ? value : undefined}
-          onValueChange={(nextValue) => onChange(field.key, nextValue)}
+          onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
         >
           <SelectTrigger>
             <SelectValue placeholder={field.label} />
@@ -206,11 +211,12 @@ function renderOptionField(
                     const current = Array.isArray(value) ? value : []
 
                     if (nextChecked === true) {
-                      onChange(field.key, [...current, option.value])
+                      onChange(field.key, [...current, option.value], "immediate")
                     } else {
                       onChange(
                         field.key,
-                        current.filter((item) => item !== option.value)
+                        current.filter((item) => item !== option.value),
+                        "immediate"
                       )
                     }
                   }}
@@ -230,7 +236,7 @@ function renderOptionField(
         <Label>{field.label}</Label>
         <Textarea
           value={typeof value === "string" ? value : ""}
-          onChange={(event) => onChange(field.key, event.target.value)}
+          onChange={(event) => onChange(field.key, event.target.value, "debounced")}
           placeholder={field.placeholder}
           rows={field.rows}
         />
@@ -245,7 +251,7 @@ function renderOptionField(
         <Input
           type="number"
           value={typeof value === "string" ? value : ""}
-          onChange={(event) => onChange(field.key, event.target.value)}
+          onChange={(event) => onChange(field.key, event.target.value, "debounced")}
           placeholder={field.placeholder}
           min={field.min}
           max={field.max}
@@ -260,7 +266,7 @@ function renderOptionField(
       <Label>{field.label}</Label>
       <Input
         value={typeof value === "string" ? value : ""}
-        onChange={(event) => onChange(field.key, event.target.value)}
+        onChange={(event) => onChange(field.key, event.target.value, "debounced")}
         placeholder={field.placeholder}
         inputMode={field.inputMode}
       />
@@ -271,7 +277,7 @@ function renderOptionField(
 function renderOptionFields(
   fields: ZalivatorOptionField[],
   currentValues: Record<string, ZalivatorOptionValue>,
-  onChange: (key: string, value: ZalivatorOptionValue) => void
+  onChange: (key: string, value: ZalivatorOptionValue, mode?: ZalivatorAutoRunMode) => void
 ) {
   const content: ReactNode[] = []
 
@@ -332,10 +338,15 @@ export function ZalivatorWorkspace() {
   const [result, setResult] = useState<ZalivatorGenerateResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, setIsPending] = useState(false)
+  const autoRunModeRef = useRef<ZalivatorAutoRunMode>("immediate")
+  const hasAutoGeneratedRef = useRef(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const autoRunTimeoutRef = useRef<number | null>(null)
 
   const metadata = getZalivatorGeneratorMetadata(generator)
 
   const handleGeneratorChange = (nextGenerator: ZalivatorGeneratorId) => {
+    autoRunModeRef.current = "immediate"
     setGenerator(nextGenerator)
     setOptions(buildDefaultOptions(nextGenerator))
     setUnique(false)
@@ -343,7 +354,12 @@ export function ZalivatorWorkspace() {
     setError(null)
   }
 
-  const handleOptionChange = (key: string, nextValue: ZalivatorOptionValue) => {
+  const handleOptionChange = (
+    key: string,
+    nextValue: ZalivatorOptionValue,
+    mode: ZalivatorAutoRunMode = "immediate"
+  ) => {
+    autoRunModeRef.current = mode
     setOptions((current) => {
       const nextOptions = {
         ...current,
@@ -363,18 +379,31 @@ export function ZalivatorWorkspace() {
     })
   }
 
-  const handleGenerate = async () => {
+  const handleQuantityChange = (
+    nextQuantity: number,
+    mode: ZalivatorAutoRunMode = "immediate"
+  ) => {
+    autoRunModeRef.current = mode
+    setQuantity(nextQuantity)
+  }
+
+  const runGenerate = useCallback(async () => {
+    const currentMetadata = getZalivatorGeneratorMetadata(generator)
+    const payloadOptions = buildPayloadOptions(currentMetadata.optionFields, options)
+    const abortController = new AbortController()
+
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = abortController
     setIsPending(true)
     setError(null)
 
     try {
-      const payloadOptions = buildPayloadOptions(metadata.optionFields, options)
-
       const response = await fetch("/api/zalivator/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        signal: abortController.signal,
         body: JSON.stringify({
           generator,
           quantity,
@@ -389,65 +418,119 @@ export function ZalivatorWorkspace() {
         throw new Error("error" in payload ? payload.error : "Не удалось сгенерировать значения.")
       }
 
+      if (abortControllerRef.current !== abortController) {
+        return
+      }
+
       setResult(payload)
     } catch (cause) {
+      if (isAbortError(cause)) {
+        return
+      }
+
+      if (abortControllerRef.current !== abortController) {
+        return
+      }
+
       setResult(null)
       setError(cause instanceof Error ? cause.message : "Не удалось сгенерировать значения.")
     } finally {
-      setIsPending(false)
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null
+        setIsPending(false)
+      }
     }
-  }
+  }, [generator, options, quantity, unique])
+
+  useEffect(() => {
+    return () => {
+      if (autoRunTimeoutRef.current !== null) {
+        window.clearTimeout(autoRunTimeoutRef.current)
+      }
+      abortControllerRef.current?.abort()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!hasAutoGeneratedRef.current) {
+      hasAutoGeneratedRef.current = true
+      void runGenerate()
+      return
+    }
+
+    if (autoRunModeRef.current === "debounced") {
+      autoRunTimeoutRef.current = window.setTimeout(() => {
+        void runGenerate()
+        autoRunTimeoutRef.current = null
+      }, ZALIVATOR_AUTO_RUN_DEBOUNCE_MS)
+
+      return () => {
+        if (autoRunTimeoutRef.current !== null) {
+          window.clearTimeout(autoRunTimeoutRef.current)
+          autoRunTimeoutRef.current = null
+        }
+      }
+    }
+
+    void runGenerate()
+  }, [generator, options, quantity, unique, runGenerate])
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col gap-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-5 lg:overflow-hidden xl:grid-cols-[340px_minmax(0,1fr)]">
-      <Card className="h-fit">
-        <CardContent className="space-y-6 p-5 lg:p-6">
+    <main className="flex h-full min-h-0 w-full flex-col gap-0 lg:grid lg:grid-cols-[220px_360px_minmax(0,1fr)] lg:overflow-hidden">
+      <aside className="min-h-0 border-b lg:h-full lg:border-r lg:border-b-0">
+        <div className="min-h-0 lg:h-full lg:overflow-auto">
           <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
+        </div>
+      </aside>
 
-          {generator === "uuidV7" ? (
-            <p className="text-sm leading-5 text-muted-foreground">
-              RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
-            </p>
-          ) : null}
-
-          {metadata.optionFields.length > 0 ? (
-            <>
-              <section className="space-y-4.5">
-                {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
-              </section>
-            </>
-          ) : null}
-
-          <Separator />
-          <ZalivatorQuantityControl value={quantity} onChange={setQuantity} />
-
-          {metadata.supportsUnique ? (
-            <section className="flex items-start gap-3">
-              <Checkbox
-                id="zalivator-unique"
-                checked={unique}
-                onCheckedChange={(checked) => setUnique(checked === true)}
-                className="mt-0.5"
-              />
-              <div className="space-y-1">
-                <Label htmlFor="zalivator-unique">Только уникальные</Label>
+      <Card className="min-h-0 overflow-hidden rounded-none border-0 border-b ring-0 shadow-none lg:h-full lg:border-r lg:border-b-0">
+        <CardContent className="flex h-full min-h-0 flex-col p-0">
+          <div className="min-h-0 flex-1 overflow-auto">
+            <div className="space-y-6 px-5 py-5 lg:px-6 lg:py-6">
+              {generator === "uuidV7" ? (
                 <p className="text-sm leading-5 text-muted-foreground">
-                  Значения не будут повторяться внутри одного набора.
+                  RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
                 </p>
-              </div>
-            </section>
-          ) : null}
+              ) : null}
 
-          <Button onClick={handleGenerate} disabled={isPending} className="w-full">
-            {isPending ? "Генерация..." : "Сгенерировать"}
-          </Button>
+              {metadata.optionFields.length > 0 ? (
+                <section className="space-y-5">
+                  {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
+                </section>
+              ) : null}
 
-          {error ? <p className="text-sm leading-5 text-destructive">{error}</p> : null}
+              <Separator />
+
+              <section className="space-y-5">
+                <ZalivatorQuantityControl value={quantity} onChange={handleQuantityChange} />
+
+                {metadata.supportsUnique ? (
+                  <section className="flex items-start gap-3">
+                    <Checkbox
+                      id="zalivator-unique"
+                      checked={unique}
+                      onCheckedChange={(checked) => {
+                        autoRunModeRef.current = "immediate"
+                        setUnique(checked === true)
+                      }}
+                      className="mt-0.5"
+                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="zalivator-unique">Только уникальные</Label>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Значения не будут повторяться внутри одного набора.
+                      </p>
+                    </div>
+                  </section>
+                ) : null}
+              </section>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <ZalivatorResultList result={result} />
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:h-full">
+        <ZalivatorResultList result={result} isPending={isPending} error={error} />
       </section>
     </main>
   )

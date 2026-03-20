@@ -13,14 +13,8 @@ import {
   UserRound,
 } from "lucide-react"
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/ui-kit"
 import { listZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
+import { cn } from "@/lib/utils"
 import type { ZalivatorGeneratorId } from "@/lib/zalivator/types"
 
 type ZalivatorGeneratorPickerProps = {
@@ -48,29 +42,30 @@ export function ZalivatorGeneratorPicker({
   } as const
 
   return (
-    <section>
-      <Select
-        value={value}
-        onValueChange={(nextValue) => onChange(nextValue as ZalivatorGeneratorId)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Выбери тип данных" />
-        </SelectTrigger>
-        <SelectContent>
-          {generators.map((generator) => {
-            const Icon = generatorIcons[generator.id]
+    <nav className="space-y-1 px-2 py-2" aria-label="Типы данных Zalivator">
+      {generators.map((generator) => {
+        const Icon = generatorIcons[generator.id]
+        const isActive = generator.id === value
 
-            return (
-              <SelectItem key={generator.id} value={generator.id}>
-                <span className="flex items-center gap-2">
-                  <Icon className="size-4 text-muted-foreground" />
-                  <span>{generator.label}</span>
-                </span>
-              </SelectItem>
-            )
-          })}
-        </SelectContent>
-      </Select>
-    </section>
+        return (
+          <button
+            key={generator.id}
+            type="button"
+            onClick={() => onChange(generator.id)}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              isActive
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            )}
+            aria-pressed={isActive}
+          >
+            <Icon className="size-4 shrink-0" />
+            <span className="min-w-0 flex-1 truncate">{generator.label}</span>
+          </button>
+        )
+      })}
+    </nav>
   )
 }

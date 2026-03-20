@@ -7,9 +7,11 @@ import {
   ZALIVATOR_QUANTITY_PRESETS,
 } from "@/lib/zalivator/metadata"
 
+type ZalivatorQuantityAutoRunMode = "immediate" | "debounced"
+
 type ZalivatorQuantityControlProps = {
   value: number
-  onChange: (value: number) => void
+  onChange: (value: number, mode?: ZalivatorQuantityAutoRunMode) => void
 }
 
 export function ZalivatorQuantityControl({
@@ -19,15 +21,15 @@ export function ZalivatorQuantityControl({
   const selectedPreset = ZALIVATOR_QUANTITY_PRESETS.find((preset) => preset === value)
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <Label>Количество</Label>
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <ToggleGroup
           type="single"
           value={selectedPreset ? String(selectedPreset) : undefined}
           onValueChange={(nextValue) => {
             if (nextValue) {
-              onChange(Number(nextValue))
+              onChange(Number(nextValue), "immediate")
             }
           }}
           variant="outline"
@@ -44,7 +46,7 @@ export function ZalivatorQuantityControl({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label className="text-muted-foreground">Свое количество</Label>
           <Input
             type="number"
@@ -52,13 +54,17 @@ export function ZalivatorQuantityControl({
             max={ZALIVATOR_QUANTITY_MAX}
             value={value}
             onChange={(event) => {
+              if (event.target.value === "") {
+                return
+              }
+
               const nextValue = Number(event.target.value)
 
               if (Number.isFinite(nextValue)) {
-                onChange(nextValue)
+                onChange(nextValue, "debounced")
               }
             }}
-            className="w-full max-w-40"
+            className="w-full"
           />
         </div>
       </div>

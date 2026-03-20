@@ -3,12 +3,10 @@
 import { ClipboardCopy, Inbox } from "lucide-react"
 
 import {
-  Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
   Table,
   TableBody,
   TableCell,
@@ -16,39 +14,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui-kit"
-import { getZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
 import type { ZalivatorGenerateResponse } from "@/lib/zalivator/types"
 
 type ZalivatorResultListProps = {
   result: ZalivatorGenerateResponse | null
+  isPending: boolean
+  error: string | null
 }
 
-export function ZalivatorResultList({ result }: ZalivatorResultListProps) {
+export function ZalivatorResultList({
+  result,
+  isPending,
+  error,
+}: ZalivatorResultListProps) {
   if (!result || result.values.length === 0) {
     return (
-      <Card className="min-h-0 flex-1 border-dashed">
-        <CardContent className="flex h-full min-h-[320px] flex-col items-center justify-center gap-3 px-6 text-center">
+      <Card className="min-h-0 flex-1 overflow-hidden rounded-none border-0 ring-0 shadow-none lg:h-full">
+        <CardContent className="flex h-full min-h-[320px] flex-col items-center justify-center gap-3 px-6 text-center lg:min-h-0">
           <span className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Inbox className="size-5 text-muted-foreground" />
           </span>
-          <p className="text-sm leading-5 text-muted-foreground">Результаты появятся здесь</p>
+          {error ? (
+            <p className="text-sm leading-5 text-destructive">{error}</p>
+          ) : isPending ? (
+            <p className="text-sm leading-5 text-muted-foreground">Обновляю результаты...</p>
+          ) : (
+            <p className="text-sm leading-5 text-muted-foreground">Результаты появятся здесь</p>
+          )}
         </CardContent>
       </Card>
     )
   }
-
-  const generator = getZalivatorGeneratorMetadata(result.generator)
 
   const copyAll = async () => {
     await navigator.clipboard.writeText(result.values.join("\n"))
   }
 
   return (
-    <Card className="min-h-0 flex-1 overflow-hidden">
-      <CardHeader className="flex-row items-center justify-between gap-4 space-y-0 border-b">
-        <div className="flex min-w-0 items-center gap-3">
-          <CardTitle className="truncate">{generator.label}</CardTitle>
-          <Badge variant="secondary">{result.quantity}</Badge>
+    <Card className="min-h-0 flex-1 overflow-hidden rounded-none border-0 ring-0 shadow-none lg:h-full">
+      <CardHeader className="flex-row items-center justify-between gap-4 space-y-0 border-b px-5 py-4">
+        <div className="min-h-5 min-w-0">
+          {error ? (
+            <p className="text-sm leading-5 text-destructive">{error}</p>
+          ) : isPending ? (
+            <p className="text-sm leading-5 text-muted-foreground">Обновляю результаты...</p>
+          ) : null}
         </div>
         <Button variant="outline" size="sm" onClick={copyAll}>
           <ClipboardCopy className="size-4" />
@@ -61,7 +71,7 @@ export function ZalivatorResultList({ result }: ZalivatorResultListProps) {
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>{generator.label}</TableHead>
+                <TableHead>Значение</TableHead>
                 <TableHead className="w-16 text-right">Копия</TableHead>
               </TableRow>
             </TableHeader>

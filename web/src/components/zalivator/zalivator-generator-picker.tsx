@@ -1,6 +1,6 @@
 "use client"
 
-import { AtSign, Smartphone, UserRound } from "lucide-react"
+import { AtSign, Building2, IdCard, Smartphone, UserRound } from "lucide-react"
 
 import { Label, ToggleGroup, ToggleGroupItem } from "@/ui-kit"
 import { listZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
@@ -20,6 +20,8 @@ export function ZalivatorGeneratorPicker({
     name: UserRound,
     mobilePhone: Smartphone,
     email: AtSign,
+    snils: IdCard,
+    city: Building2,
   } as const
 
   return (

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { executeZalivatorGenerateRequest } from "@/lib/zalivator/executor"
 import type { ZalivatorGenerateRequest, ZalivatorGeneratorId } from "@/lib/zalivator/types"
 
-const GENERATORS: ZalivatorGeneratorId[] = ["name", "mobilePhone", "email"]
+const GENERATORS: ZalivatorGeneratorId[] = ["name", "mobilePhone", "email", "snils", "city"]
 
 function isGeneratorId(value: unknown): value is ZalivatorGeneratorId {
   return typeof value === "string" && GENERATORS.includes(value as ZalivatorGeneratorId)

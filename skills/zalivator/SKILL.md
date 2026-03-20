@@ -57,6 +57,8 @@ Implemented generators:
 - `name`
 - `mobilePhone`
 - `email`
+- `snils`
+- `city`
 
 The current public response is text-first:
 - `kind`
@@ -93,6 +95,14 @@ Use discovery metadata for web and future plugin configuration UIs.
 
 `email`
 - `domain?: string`
+
+`snils`
+- no options in `v1`
+- must return the usual formatted string with a valid control sum
+
+`city`
+- no options in `v1`
+- can be generated from a fixed built-in list of Russian cities
 
 Route and executor rules:
 - non-object `options` must fail with `400`

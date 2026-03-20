@@ -75,6 +75,22 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
       },
     ],
   },
+  snils: {
+    id: "snils",
+    label: "СНИЛС",
+    description: "Страховой номер с корректной контрольной суммой.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [],
+  },
+  city: {
+    id: "city",
+    label: "Город",
+    description: "Один из популярных российских городов.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [],
+  },
 }
 
 export function listZalivatorGeneratorMetadata() {

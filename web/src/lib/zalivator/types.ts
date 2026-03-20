@@ -1,4 +1,9 @@
-export type ZalivatorGeneratorId = "name" | "mobilePhone" | "email"
+export type ZalivatorGeneratorId =
+  | "name"
+  | "mobilePhone"
+  | "email"
+  | "snils"
+  | "city"
 
 export type ZalivatorGenerateRequest = {
   generator: ZalivatorGeneratorId

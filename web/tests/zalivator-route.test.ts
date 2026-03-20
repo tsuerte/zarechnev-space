@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 
 import { GET } from "../src/app/api/zalivator/generators/route"
 import { POST } from "../src/app/api/zalivator/generate/route"
+import { listZalivatorGeneratorMetadata } from "../src/lib/zalivator/metadata"
 
 function createGenerateRequest(body: unknown) {
   return new Request("http://localhost/api/zalivator/generate", {
@@ -43,6 +44,27 @@ test("POST /api/zalivator/generate returns text values for a valid request", asy
   assert.equal(payload.values.length, 2)
   assert.ok(payload.values.every((value) => value.endsWith("@mail.ru")))
   assert.equal(new Set(payload.values).size, payload.values.length)
+})
+
+test("POST /api/zalivator/generate accepts every generator from discovery metadata", async () => {
+  for (const generator of listZalivatorGeneratorMetadata()) {
+    const response = await POST(
+      createGenerateRequest({
+        generator: generator.id,
+        quantity: 1,
+      })
+    )
+
+    assert.equal(response.status, 200)
+
+    const payload = (await response.json()) as {
+      generator: string
+      values: string[]
+    }
+
+    assert.equal(payload.generator, generator.id)
+    assert.equal(payload.values.length, 1)
+  }
 })
 
 test("POST /api/zalivator/generate rejects non-object options", async () => {
@@ -92,7 +114,7 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
   assert.deepEqual(payload.quantity.presets, [1, 5, 10])
   assert.deepEqual(
     payload.generators.map((generator) => generator.id),
-    ["name", "mobilePhone", "email"]
+    ["name", "mobilePhone", "email", "snils", "city"]
   )
   assert.ok(payload.generators.every((generator) => generator.supportsUnique === true))
 })

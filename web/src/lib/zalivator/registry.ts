@@ -1,6 +1,8 @@
+import { generateCity } from "@/lib/zalivator/generators/text/city"
 import { generateEmail } from "@/lib/zalivator/generators/text/email"
 import { generateMobilePhone } from "@/lib/zalivator/generators/text/mobile-phone"
 import { generateName } from "@/lib/zalivator/generators/text/name"
+import { generateSnils } from "@/lib/zalivator/generators/text/snils"
 import {
   normalizeEmailOptions,
   normalizeMobilePhoneOptions,
@@ -33,6 +35,16 @@ export const ZALIVATOR_GENERATOR_REGISTRY: Record<
     id: "email",
     normalizeOptions: normalizeEmailOptions,
     generateValue: (options) => generateEmail(options as ZalivatorEmailOptions),
+  },
+  snils: {
+    id: "snils",
+    normalizeOptions: () => ({}),
+    generateValue: () => generateSnils(),
+  },
+  city: {
+    id: "city",
+    normalizeOptions: () => ({}),
+    generateValue: () => generateCity(),
   },
 }
 

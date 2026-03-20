@@ -12,7 +12,14 @@ import {
   UserRound,
 } from "lucide-react"
 
-import { Label, ToggleGroup, ToggleGroupItem } from "@/ui-kit"
+import {
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui-kit"
 import { listZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
 import type { ZalivatorGeneratorId } from "@/lib/zalivator/types"
 
@@ -40,39 +47,30 @@ export function ZalivatorGeneratorPicker({
   } as const
 
   return (
-    <section className="space-y-2">
+    <section className="space-y-2.5">
       <Label>Тип данных</Label>
-      <ToggleGroup
-        type="single"
+      <Select
         value={value}
-        onValueChange={(nextValue) => {
-          if (nextValue) {
-            onChange(nextValue as ZalivatorGeneratorId)
-          }
-        }}
-        variant="outline"
-        spacing={1}
-        className="flex w-full flex-wrap justify-start"
+        onValueChange={(nextValue) => onChange(nextValue as ZalivatorGeneratorId)}
       >
-        {generators.map((generator) => (
-          <ToggleGroupItem
-            key={generator.id}
-            value={generator.id}
-            className="gap-2 px-3"
-          >
-            {(() => {
-              const Icon = generatorIcons[generator.id]
+        <SelectTrigger>
+          <SelectValue placeholder="Выбери тип данных" />
+        </SelectTrigger>
+        <SelectContent>
+          {generators.map((generator) => {
+            const Icon = generatorIcons[generator.id]
 
-              return (
-                <>
-                  <Icon className="size-4" />
+            return (
+              <SelectItem key={generator.id} value={generator.id}>
+                <span className="flex items-center gap-2">
+                  <Icon className="size-4 text-muted-foreground" />
                   <span>{generator.label}</span>
-                </>
-              )
-            })()}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+                </span>
+              </SelectItem>
+            )
+          })}
+        </SelectContent>
+      </Select>
     </section>
   )
 }

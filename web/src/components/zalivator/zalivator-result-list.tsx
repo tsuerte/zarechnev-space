@@ -31,12 +31,7 @@ export function ZalivatorResultList({ result }: ZalivatorResultListProps) {
           <span className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Inbox className="size-5 text-muted-foreground" />
           </span>
-          <div className="space-y-1">
-            <p className="text-sm leading-5">Результаты появятся здесь</p>
-            <p className="text-sm leading-5 text-muted-foreground">
-              Выбери тип данных, настрой параметры и запусти генерацию.
-            </p>
-          </div>
+          <p className="text-sm leading-5 text-muted-foreground">Результаты появятся здесь</p>
         </CardContent>
       </Card>
     )
@@ -50,14 +45,12 @@ export function ZalivatorResultList({ result }: ZalivatorResultListProps) {
 
   return (
     <Card className="min-h-0 flex-1 overflow-hidden">
-      <CardHeader className="flex-row items-start justify-between gap-4 space-y-0 border-b">
-        <div className="space-y-2">
-          <CardTitle>{generator.label}</CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{result.quantity} значений</Badge>
-          </div>
+      <CardHeader className="flex-row items-center justify-between gap-4 space-y-0 border-b">
+        <div className="flex min-w-0 items-center gap-3">
+          <CardTitle className="truncate">{generator.label}</CardTitle>
+          <Badge variant="secondary">{result.quantity}</Badge>
         </div>
-        <Button variant="outline" onClick={copyAll}>
+        <Button variant="outline" size="sm" onClick={copyAll}>
           <ClipboardCopy className="size-4" />
           Скопировать всё
         </Button>
@@ -74,13 +67,14 @@ export function ZalivatorResultList({ result }: ZalivatorResultListProps) {
             </TableHeader>
             <TableBody>
               {result.values.map((value, index) => (
-                <TableRow key={`${value}-${index}`}>
+                <TableRow key={`${value}-${index}`} className="group">
                   <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                  <TableCell className="py-3">{value}</TableCell>
+                  <TableCell className="py-3 font-medium">{value}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                       onClick={() => navigator.clipboard.writeText(value)}
                       aria-label={`Скопировать значение ${index + 1}`}
                     >

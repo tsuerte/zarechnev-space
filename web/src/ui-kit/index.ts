@@ -40,6 +40,16 @@ export {
 } from "@/ui-kit/dropdown-menu"
 export { Input } from "@/ui-kit/input"
 export { Label } from "@/ui-kit/label"
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui-kit/select"
 export { Separator } from "@/ui-kit/separator"
 export { Slider } from "@/ui-kit/slider"
 export {

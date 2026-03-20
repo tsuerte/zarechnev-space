@@ -9,6 +9,11 @@ import {
   Checkbox,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Separator,
   ToggleGroup,
   ToggleGroupItem,
@@ -42,8 +47,31 @@ function renderOptionField(
   onChange: (key: string, value: string) => void
 ) {
   if (field.control === "segmented") {
+    if (field.options.length > 4) {
+      return (
+        <div key={field.key} className="space-y-2.5">
+          <Label>{field.label}</Label>
+          <Select
+            value={typeof value === "string" ? value : undefined}
+            onValueChange={(nextValue) => onChange(field.key, nextValue)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={field.label} />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    }
+
     return (
-      <div key={field.key} className="space-y-2">
+      <div key={field.key} className="space-y-2.5">
         <Label>{field.label}</Label>
         <ToggleGroup
           type="single"
@@ -68,7 +96,7 @@ function renderOptionField(
   }
 
   return (
-    <div key={field.key} className="space-y-2">
+    <div key={field.key} className="space-y-2.5">
       <Label>{field.label}</Label>
       <Input
         value={typeof value === "string" ? value : ""}
@@ -144,9 +172,9 @@ export function ZalivatorWorkspace() {
   }
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col gap-6 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:overflow-hidden">
+    <main className="flex h-full min-h-0 w-full flex-col gap-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-5 lg:overflow-hidden xl:grid-cols-[340px_minmax(0,1fr)]">
       <Card className="h-fit">
-        <CardContent className="space-y-5 p-6">
+        <CardContent className="space-y-6 p-5 lg:p-6">
           <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
 
           {generator === "uuidV7" ? (
@@ -158,7 +186,7 @@ export function ZalivatorWorkspace() {
           {metadata.optionFields.length > 0 ? (
             <>
               <Separator />
-              <section className="space-y-4">
+              <section className="space-y-4.5">
                 {metadata.optionFields.map((field) =>
                   renderOptionField(field, options[field.key], handleOptionChange)
                 )}

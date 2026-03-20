@@ -177,5 +177,6 @@ When that happens:
 - Prefer a compact control panel on the left and a dedicated result workspace on the right.
 - Prefer stock `ui-kit` control sizes and spacing over decorative local overrides.
 - Keep generator and option selection close to standard `ToggleGroup` / `Input` / `Label` patterns unless a stronger reason exists.
+- Prefer `Select` over wrapped segmented controls when the choice list gets long or visually noisy.
 - Keep result presentation centered on fast scanning and fast copying.
 - Row-level copy actions are acceptable for text outputs; avoid reintroducing JSON-first result UX.

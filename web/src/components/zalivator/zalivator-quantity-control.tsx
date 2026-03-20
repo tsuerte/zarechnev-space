@@ -19,9 +19,9 @@ export function ZalivatorQuantityControl({
   const selectedPreset = ZALIVATOR_QUANTITY_PRESETS.find((preset) => preset === value)
 
   return (
-    <section className="space-y-2">
+    <section className="space-y-3">
       <Label>Количество</Label>
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <ToggleGroup
           type="single"
           value={selectedPreset ? String(selectedPreset) : undefined}
@@ -44,7 +44,7 @@ export function ZalivatorQuantityControl({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label className="text-muted-foreground">Свое количество</Label>
           <Input
             type="number"
@@ -58,7 +58,7 @@ export function ZalivatorQuantityControl({
                 onChange(nextValue)
               }
             }}
-            className="w-full"
+            className="w-full max-w-40"
           />
         </div>
       </div>

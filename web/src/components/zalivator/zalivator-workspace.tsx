@@ -144,7 +144,7 @@ export function ZalivatorWorkspace() {
   }
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col gap-6 lg:grid lg:grid-cols-[360px_minmax(0,1fr)]">
+    <main className="flex h-full min-h-0 w-full flex-col gap-6 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:overflow-hidden">
       <Card className="h-fit">
         <CardContent className="space-y-5 p-6">
           <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
@@ -188,7 +188,7 @@ export function ZalivatorWorkspace() {
         </CardContent>
       </Card>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <ZalivatorResultList result={result} />
       </section>
     </main>

@@ -70,8 +70,9 @@ Primary files:
 - Treat `/lab/svg` as a generic public SVG utility. Do not mix it with `/lab/icons` storage or internal icon-catalog behavior.
 - The canonical pipeline is shared infrastructure. Be careful: changing `pipeline.ts` can affect both the optimizer and icons sync.
 - App code must import UI only from `@/ui-kit`.
-- Prefer usage-level changes for SVG Optimizer-specific UI.
-- Use `ui-kit` only when the change is shared policy for controls reused outside the optimizer.
+- Prefer official shadcn structure and composition patterns before inventing optimizer-specific wrappers.
+- Treat `ui-kit` as the public import boundary, not as a styling/customization layer.
+- Keep usage-layer classes limited to layout composition.
 - Do not reintroduce separate `Single` and `Batch` product modes unless explicitly requested.
 - Do not add manual optimization settings or expose raw SVGO tuning unless explicitly requested.
 - Keep user-visible downloads based on optimized output. Do not leak internal source SVG from the icons pipeline into the generic optimizer UI.
@@ -82,7 +83,7 @@ Primary files:
 
 - Most tool changes belong in `web/src/components/svg-optimizer-batch.tsx`.
 - Keep the unified flow intact unless the user explicitly asks to change the product model.
-- If you change shared control styling or behavior, justify it and prefer `web/src/ui-kit/*`.
+- If a shared control pattern is missing, prefer adding the official shadcn component or recipe before introducing any custom wrapper.
 
 ### API changes
 

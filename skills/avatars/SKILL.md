@@ -54,8 +54,9 @@ Primary files:
 
 - App code must import UI only from `@/ui-kit`.
 - Treat `web/src/components/ui/*` as the base shadcn layer. Do not change it for avatar work unless there is a separately justified primitive-level reason.
-- Prefer usage-level changes for avatar-specific UI behavior.
-- Use `ui-kit` only when the change is shared policy for controls used outside `Avatars`.
+- Prefer official shadcn structure and composition patterns before inventing avatar-specific wrappers.
+- Treat `ui-kit` as the public import boundary, not as a styling/customization layer.
+- Keep usage-layer classes limited to layout composition.
 - Keep the web avatar DTO minimal. Do not pull extra Studio fields into web without a concrete UI or API need.
 - Keep ZIP export server-side. Do not reintroduce browser-side direct asset fetching from `cdn.sanity.io`.
 - Treat `sourceUrl` as Studio-side metadata unless the user explicitly wants it in the public web contract.
@@ -65,7 +66,7 @@ Primary files:
 ### UI changes
 
 - Most avatar page changes belong in `web/src/components/avatars-browser.tsx`.
-- If you change shared control styling or behavior, make that case explicitly and prefer `web/src/ui-kit/*` over `web/src/components/ui/*`.
+- If a shared control pattern is missing, prefer adding the official shadcn component or recipe before introducing any custom wrapper.
 
 ### Sanity model changes
 

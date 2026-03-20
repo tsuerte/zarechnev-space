@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui-kit"
+import { cn } from "@/lib/utils"
 
 type ContentImageValue = {
   _type: "contentImage"
@@ -208,7 +209,10 @@ const components: PortableTextComponents = {
       if (!callout.text) return null
 
       return (
-        <Alert tone={tone} className="my-7">
+        <Alert
+          variant={tone === "warning" ? "destructive" : "default"}
+          className={cn("my-7", tone === "success" && "border-emerald-500/30")}
+        >
           {callout.title ? <AlertTitle>{callout.title}</AlertTitle> : null}
           <AlertDescription>{callout.text}</AlertDescription>
         </Alert>

@@ -89,8 +89,9 @@ Primary files:
 - Treat `size`, `strokeWidth`, and `color` as preview state only.
 - Do not silently expand preview controls into "export customized icon" behavior unless explicitly requested.
 - App code must import UI only from `@/ui-kit`.
-- Prefer usage-level changes for icon-catalog-specific UI.
-- Use `ui-kit` only when the change is shared policy outside the icons catalog.
+- Prefer official shadcn composition patterns before inventing icon-catalog-specific wrappers.
+- Treat `ui-kit` as the public import boundary, not as a styling/customization layer.
+- Keep usage-layer classes limited to layout composition.
 - Be careful with `pipeline.ts` changes: icons sync shares that canonical SVG pipeline with `/lab/svg`.
 
 ## Common Tasks

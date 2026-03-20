@@ -237,11 +237,9 @@ function renderOptionField(
                       }
                     }}
                   />
-                  <FieldContent>
-                    <FieldLabel htmlFor={`${field.key}-${option.value}`}>
-                      {option.label}
-                    </FieldLabel>
-                  </FieldContent>
+                  <FieldLabel htmlFor={`${field.key}-${option.value}`}>
+                    {option.label}
+                  </FieldLabel>
                 </Field>
               )
             })}
@@ -541,9 +539,7 @@ export function ZalivatorWorkspace() {
                         setUnique(checked === true)
                       }}
                     />
-                    <FieldContent>
-                      <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
-                    </FieldContent>
+                    <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
                   </Field>
                 ) : null}
               </section>

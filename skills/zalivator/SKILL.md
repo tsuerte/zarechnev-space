@@ -192,7 +192,7 @@ When that happens:
   - central settings panel for generator-specific and shared controls
   - right result workspace
 - Keep the workspace visually plain and tool-like: avoid invented uppercase section headers, decorative shadows, and extra chrome that is not present in shadcn / Vercel / v0 patterns.
-- Prefer stock `ui-kit` control sizes and spacing over decorative local overrides.
+- Prefer stock shadcn control sizes and spacing over decorative local overrides.
 - Keep usage-layer custom classes to page/layout composition only:
   - grid
   - gap between blocks
@@ -204,6 +204,7 @@ When that happens:
   - control row states
   - micro-spacing already handled by `Field`, `FieldGroup`, or `FieldContent`
 - When building Zalivator settings UIs, prefer `Field`, `FieldGroup`, and `FieldContent` for control composition instead of hand-written `flex` wrappers.
+- Treat `ui-kit` only as the public import boundary; do not use it as a styling/customization layer.
 - Keep generator and option selection close to standard `ToggleGroup` / `Input` / `Label` patterns unless a stronger reason exists.
 - Prefer `Select` over wrapped segmented controls when the choice list gets long or visually noisy.
 - For generator-specific option UIs, metadata should stay expressive enough to drive `select`, `number`, `checkbox-group`, and `textarea` controls without hardcoding generator-specific React branches.

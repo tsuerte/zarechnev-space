@@ -2,6 +2,13 @@ import type {
   ZalivatorGeneratorId,
   ZalivatorGeneratorMetadata,
 } from "@/lib/zalivator/types"
+import {
+  ZALIVATOR_MEASUREMENT_CUSTOM_TYPE,
+  ZALIVATOR_MEASUREMENT_STANDARD_TYPE_ORDER,
+  getMeasurementSubtypeChoices,
+  listMeasurementTypeChoices,
+  type ZalivatorMeasurementStandardType,
+} from "@/lib/zalivator/measurement-catalog"
 
 export const ZALIVATOR_QUANTITY_MIN = 1
 export const ZALIVATOR_QUANTITY_MAX = 100
@@ -154,6 +161,61 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
     kind: "text",
     supportsUnique: false,
     optionFields: [],
+  },
+  measurement: {
+    id: "measurement",
+    label: "Величина",
+    description: "Случайное число с единицей измерения или пользовательским подтипом.",
+    kind: "text",
+    supportsUnique: true,
+    optionFields: [
+      {
+        key: "type",
+        label: "Тип",
+        control: "select",
+        options: listMeasurementTypeChoices(),
+      },
+      {
+        key: "min",
+        label: "Минимум",
+        control: "number",
+        defaultValue: "1",
+      },
+      {
+        key: "max",
+        label: "Максимум",
+        control: "number",
+        defaultValue: "100",
+      },
+      {
+        key: "subtypes",
+        label: "Стандартные подтипы",
+        control: "checkbox-group",
+        dependsOn: "type",
+        hiddenWhen: {
+          key: "type",
+          value: ZALIVATOR_MEASUREMENT_CUSTOM_TYPE,
+        },
+        layout: "stacked",
+        optionsByValue: Object.fromEntries(
+          ZALIVATOR_MEASUREMENT_STANDARD_TYPE_ORDER.map((type) => [
+            type,
+            getMeasurementSubtypeChoices(type as ZalivatorMeasurementStandardType),
+          ])
+        ),
+      },
+      {
+        key: "customSubtypesText",
+        label: "Свой список подтипов",
+        control: "textarea",
+        placeholder: "яблок\nкоробок\nуп.\nпачек",
+        rows: 6,
+        visibleWhen: {
+          key: "type",
+          value: ZALIVATOR_MEASUREMENT_CUSTOM_TYPE,
+        },
+      },
+    ],
   },
 }
 

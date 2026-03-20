@@ -8,12 +8,12 @@ import {
   Fingerprint,
   IdCard,
   BriefcaseBusiness,
+  Ruler,
   Smartphone,
   UserRound,
 } from "lucide-react"
 
 import {
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -44,11 +44,11 @@ export function ZalivatorGeneratorPicker({
     kpp: CreditCard,
     position: BriefcaseBusiness,
     uuidV7: Fingerprint,
+    measurement: Ruler,
   } as const
 
   return (
-    <section className="space-y-2.5">
-      <Label>Тип данных</Label>
+    <section>
       <Select
         value={value}
         onValueChange={(nextValue) => onChange(nextValue as ZalivatorGeneratorId)}

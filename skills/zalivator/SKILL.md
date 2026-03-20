@@ -64,6 +64,7 @@ Implemented generators:
 - `kpp`
 - `position`
 - `uuidV7`
+- `measurement`
 
 The current public response is text-first:
 - `kind`
@@ -129,6 +130,18 @@ Use discovery metadata for web and future plugin configuration UIs.
 - `domain: "any" | "it" | "fintech" | "construction" | "retail" | "logistics"`
 - returns a job title from the selected domain
 
+`measurement`
+- `min: integer`
+- `max: integer`
+- `type: "length" | "weight" | "volume" | "temperature" | "speed" | "frequency" | "data" | "area" | "percent" | "custom"`
+- `subtypes: string[]` for standard mode
+- `customSubtypesText` is accepted at the route boundary and normalized into a cleaned deduplicated custom subtype list when `type = "custom"`
+- standard mode uses built-in short RF-style unit labels
+- custom type uses one subtype per line from textarea input
+- empty custom subtype list falls back to a plain number without subtype
+- percentages render without a space, e.g. `45%`
+- all other subtypes render with a single space, e.g. `120 км/ч`
+
 `uuidV7`
 - no options in `v1`
 - must return a canonical lowercase UUID v7 string compatible with RFC 9562
@@ -178,5 +191,6 @@ When that happens:
 - Prefer stock `ui-kit` control sizes and spacing over decorative local overrides.
 - Keep generator and option selection close to standard `ToggleGroup` / `Input` / `Label` patterns unless a stronger reason exists.
 - Prefer `Select` over wrapped segmented controls when the choice list gets long or visually noisy.
+- For generator-specific option UIs, metadata should stay expressive enough to drive `select`, `number`, `checkbox-group`, and `textarea` controls without hardcoding generator-specific React branches.
 - Keep result presentation centered on fast scanning and fast copying.
 - Row-level copy actions are acceptable for text outputs; avoid reintroducing JSON-first result UX.

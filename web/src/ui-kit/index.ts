@@ -11,6 +11,8 @@ export {
   BreadcrumbSeparator,
 } from "@/ui-kit/breadcrumb"
 export { Button, buttonVariants } from "@/ui-kit/button"
+export { ChoiceList } from "@/ui-kit/choice-list"
+export type { ChoiceListOption } from "@/ui-kit/choice-list"
 export {
   Card,
   CardAction,
@@ -98,6 +100,7 @@ export {
   TableHeader,
   TableRow,
 } from "@/ui-kit/table"
+export { Textarea } from "@/ui-kit/textarea"
 export { ToggleGroup, ToggleGroupItem } from "@/ui-kit/toggle-group"
 export {
   Tooltip,

@@ -8,9 +8,11 @@ import {
   generateInn,
 } from "../src/lib/zalivator/generators/text/inn"
 import { generateKpp } from "../src/lib/zalivator/generators/text/kpp"
+import { generateMeasurement } from "../src/lib/zalivator/generators/text/measurement"
 import { generateMobilePhone } from "../src/lib/zalivator/generators/text/mobile-phone"
 import { generateName } from "../src/lib/zalivator/generators/text/name"
 import { generateOrganizationName } from "../src/lib/zalivator/generators/text/organization-name"
+import { normalizeMeasurementOptions } from "../src/lib/zalivator/options"
 import {
   POSITION_BY_DOMAIN,
   generatePosition,
@@ -162,6 +164,90 @@ test("position generator keeps at least 30 roles in every domain", () => {
       `domain "${domain}" should contain at least 30 positions`
     )
   }
+})
+
+test("measurement generator uses selected standard subtypes and percent stays compact", () => {
+  const originalRandom = Math.random
+  const sequence = [0, 0, 0.99, 0]
+
+  Math.random = () => sequence.shift() ?? 0
+
+  try {
+    const percent = generateMeasurement({
+      min: 45,
+      max: 45,
+      type: "percent",
+      subtypes: ["%"],
+      customSubtypes: [],
+    })
+    const length = generateMeasurement({
+      min: 120,
+      max: 120,
+      type: "length",
+      subtypes: ["км"],
+      customSubtypes: [],
+    })
+
+    assert.equal(percent, "45%")
+    assert.equal(length, "120 км")
+  } finally {
+    Math.random = originalRandom
+  }
+})
+
+test("measurement generator uses cleaned custom subtype list and can fall back to plain numbers", () => {
+  const originalRandom = Math.random
+  const sequence = [0, 0.99, 0]
+
+  Math.random = () => sequence.shift() ?? 0
+
+  try {
+    const custom = generateMeasurement({
+      min: 7,
+      max: 7,
+      type: "custom",
+      subtypes: [],
+      customSubtypes: ["яблок", "коробок"],
+    })
+    const plain = generateMeasurement({
+      min: 12,
+      max: 12,
+      type: "custom",
+      subtypes: [],
+      customSubtypes: [],
+    })
+
+    assert.equal(custom, "7 коробок")
+    assert.equal(plain, "12")
+  } finally {
+    Math.random = originalRandom
+  }
+})
+
+test("measurement options cleanup deduplicates custom subtypes and rejects invalid ranges", () => {
+  const normalized = normalizeMeasurementOptions({
+    type: "custom",
+    min: "3",
+    max: "9",
+    customSubtypesText: "яблок\n\nкоробок\nяблок\nуп.",
+  })
+
+  assert.deepEqual(normalized, {
+    min: 3,
+    max: 9,
+    type: "custom",
+    subtypes: [],
+    customSubtypes: ["яблок", "коробок", "уп."],
+  })
+
+  assert.throws(
+    () =>
+      normalizeMeasurementOptions({
+        min: 10,
+        max: 1,
+      }),
+    /min/i
+  )
 })
 
 test("uuid v7 generator returns a RFC 9562-compatible value", () => {

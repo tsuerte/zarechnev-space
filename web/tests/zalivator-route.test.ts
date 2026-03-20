@@ -125,6 +125,7 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
       "kpp",
       "position",
       "uuidV7",
+      "measurement",
     ]
   )
   const uniqueById = new Map(

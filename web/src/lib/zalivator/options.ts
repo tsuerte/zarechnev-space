@@ -1,3 +1,11 @@
+import {
+  ZALIVATOR_MEASUREMENT_CUSTOM_TYPE,
+  ZALIVATOR_MEASUREMENT_STANDARD_TYPE_ORDER,
+  listMeasurementSubtypes,
+  type ZalivatorMeasurementStandardType,
+  type ZalivatorMeasurementType,
+} from "@/lib/zalivator/measurement-catalog"
+
 export const ZALIVATOR_NAME_FORMATS = [
   "full",
   "surname-initials",
@@ -51,6 +59,14 @@ export type ZalivatorPositionOptions = {
   domain: ZalivatorPositionDomain
 }
 
+export type ZalivatorMeasurementOptions = {
+  min: number
+  max: number
+  type: ZalivatorMeasurementType
+  subtypes: string[]
+  customSubtypes: string[]
+}
+
 function assertNoUnknownOptions(
   raw: Record<string, unknown>,
   allowedKeys: string[],
@@ -65,6 +81,40 @@ function assertNoUnknownOptions(
 
 function normalizeDomain(value: string) {
   return value.trim().toLowerCase().replace(/^@+/, "")
+}
+
+function normalizeIntegerOption(
+  value: unknown,
+  key: string,
+  generator: string
+) {
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return value
+  }
+
+  if (typeof value === "string" && /^-?\d+$/.test(value.trim())) {
+    return Number.parseInt(value.trim(), 10)
+  }
+
+  throw new Error(`Опция "${key}" для generator "${generator}" должна быть целым числом.`)
+}
+
+function dedupeSubtypes(values: string[]) {
+  const seen = new Set<string>()
+  const result: string[] = []
+
+  for (const value of values) {
+    const normalized = value.trim()
+
+    if (!normalized || seen.has(normalized)) {
+      continue
+    }
+
+    seen.add(normalized)
+    result.push(normalized)
+  }
+
+  return result
 }
 
 export function createNoOptionsNormalizer(generator: string) {
@@ -194,4 +244,72 @@ export function normalizePositionOptions(
   }
 
   return { domain: domain as ZalivatorPositionDomain }
+}
+
+export function normalizeMeasurementOptions(
+  raw: Record<string, unknown> = {}
+): ZalivatorMeasurementOptions {
+  assertNoUnknownOptions(
+    raw,
+    ["min", "max", "type", "subtypes", "customSubtypesText"],
+    "measurement"
+  )
+
+  const type = raw.type
+
+  const normalizedType =
+    type === undefined
+      ? ZALIVATOR_MEASUREMENT_STANDARD_TYPE_ORDER[0]
+      : typeof type === "string" &&
+          (type === ZALIVATOR_MEASUREMENT_CUSTOM_TYPE ||
+            ZALIVATOR_MEASUREMENT_STANDARD_TYPE_ORDER.includes(
+              type as ZalivatorMeasurementStandardType
+            ))
+        ? (type as ZalivatorMeasurementType)
+        : null
+
+  if (normalizedType === null) {
+    throw new Error('Опция "type" для generator "measurement" имеет недопустимое значение.')
+  }
+
+  const min = raw.min === undefined ? 1 : normalizeIntegerOption(raw.min, "min", "measurement")
+  const max = raw.max === undefined ? 100 : normalizeIntegerOption(raw.max, "max", "measurement")
+
+  if (min > max) {
+    throw new Error('Опция "min" не может быть больше "max" для generator "measurement".')
+  }
+
+  const allowedSubtypes =
+    normalizedType === ZALIVATOR_MEASUREMENT_CUSTOM_TYPE
+      ? new Set<string>()
+      : new Set(listMeasurementSubtypes(normalizedType))
+
+  let selectedSubtypes: string[] = []
+
+  if (normalizedType === ZALIVATOR_MEASUREMENT_CUSTOM_TYPE) {
+    selectedSubtypes = []
+  } else if (raw.subtypes === undefined) {
+    selectedSubtypes = listMeasurementSubtypes(normalizedType)
+  } else if (Array.isArray(raw.subtypes) && raw.subtypes.every((item) => typeof item === "string")) {
+    selectedSubtypes = dedupeSubtypes(raw.subtypes)
+  } else if (typeof raw.subtypes === "string") {
+    selectedSubtypes = dedupeSubtypes([raw.subtypes])
+  } else {
+    throw new Error('Опция "subtypes" для generator "measurement" должна быть строкой или списком строк.')
+  }
+
+  const normalizedSubtypes = selectedSubtypes.filter((subtype) => allowedSubtypes.has(subtype))
+
+  const customSubtypesText =
+    typeof raw.customSubtypesText === "string" ? raw.customSubtypesText : ""
+
+  const customSubtypes = dedupeSubtypes(customSubtypesText.split(/\r?\n/))
+
+  return {
+    min,
+    max,
+    type: normalizedType,
+    subtypes: normalizedSubtypes,
+    customSubtypes,
+  }
 }

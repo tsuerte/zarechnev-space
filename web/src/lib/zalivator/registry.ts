@@ -2,6 +2,7 @@ import { generateCity } from "@/lib/zalivator/generators/text/city"
 import { generateEmail } from "@/lib/zalivator/generators/text/email"
 import { generateInn } from "@/lib/zalivator/generators/text/inn"
 import { generateKpp } from "@/lib/zalivator/generators/text/kpp"
+import { generateMeasurement } from "@/lib/zalivator/generators/text/measurement"
 import { generateMobilePhone } from "@/lib/zalivator/generators/text/mobile-phone"
 import { generateName } from "@/lib/zalivator/generators/text/name"
 import { generateOrganizationName } from "@/lib/zalivator/generators/text/organization-name"
@@ -12,10 +13,12 @@ import {
   normalizeEmailOptions,
   normalizeInnOptions,
   normalizeMobilePhoneOptions,
+  normalizeMeasurementOptions,
   normalizeNameOptions,
   normalizePositionOptions,
   type ZalivatorEmailOptions,
   type ZalivatorInnOptions,
+  type ZalivatorMeasurementOptions,
   type ZalivatorMobilePhoneOptions,
   type ZalivatorNameOptions,
   type ZalivatorPositionOptions,
@@ -79,6 +82,12 @@ export const ZALIVATOR_GENERATOR_REGISTRY: Record<
     id: "uuidV7",
     normalizeOptions: () => ({}),
     generateValue: () => generateUuidV7(),
+  },
+  measurement: {
+    id: "measurement",
+    normalizeOptions: normalizeMeasurementOptions,
+    generateValue: (options) =>
+      generateMeasurement(options as ZalivatorMeasurementOptions),
   },
 }
 

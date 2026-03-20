@@ -19,6 +19,15 @@ import {
   calculateSnilsCheckNumber,
   generateSnils,
 } from "../src/lib/zalivator/generators/text/snils"
+import { generateUuidV7 } from "../src/lib/zalivator/generators/text/uuid-v7"
+
+function decodeUuidV7Timestamp(value: string) {
+  return Number.parseInt(value.replace(/-/g, "").slice(0, 12), 16)
+}
+
+function decodeUuidV7Counter(value: string) {
+  return Number.parseInt(value.replace(/-/g, "").slice(12, 16), 16) & 0x0fff
+}
 
 test("name generator supports configured text formats", () => {
   const full = generateName({ format: "full", gender: "male" })
@@ -108,21 +117,42 @@ test("kpp generator returns a 9-digit format-valid value", () => {
 })
 
 test("position generator respects selected domain and supports any", () => {
-  const itValues = new Set(
-    Array.from({ length: 20 }, () => generatePosition({ domain: "it" }))
-  )
-  const logisticsValues = new Set(
-    Array.from({ length: 20 }, () => generatePosition({ domain: "logistics" }))
-  )
-  const anyValues = new Set(
-    Array.from({ length: 50 }, () => generatePosition({ domain: "any" }))
-  )
+  const allPositions = Object.values(POSITION_BY_DOMAIN).flat()
+  const logisticsOffset =
+    POSITION_BY_DOMAIN.it.length +
+    POSITION_BY_DOMAIN.fintech.length +
+    POSITION_BY_DOMAIN.construction.length +
+    POSITION_BY_DOMAIN.retail.length
 
-  assert.ok([...itValues].every((value) => !logisticsValues.has(value)))
-  assert.ok(itValues.size > 1)
-  assert.ok(logisticsValues.size > 1)
-  assert.ok([...anyValues].some((value) => itValues.has(value)))
-  assert.ok([...anyValues].some((value) => logisticsValues.has(value)))
+  const originalRandom = Math.random
+  const sequence = [
+    0,
+    (POSITION_BY_DOMAIN.it.length - 1) / POSITION_BY_DOMAIN.it.length,
+    0,
+    (POSITION_BY_DOMAIN.logistics.length - 1) / POSITION_BY_DOMAIN.logistics.length,
+    0,
+    logisticsOffset / allPositions.length,
+  ]
+
+  Math.random = () => sequence.shift() ?? 0
+
+  try {
+    const firstIt = generatePosition({ domain: "it" })
+    const lastIt = generatePosition({ domain: "it" })
+    const firstLogistics = generatePosition({ domain: "logistics" })
+    const lastLogistics = generatePosition({ domain: "logistics" })
+    const anyIt = generatePosition({ domain: "any" })
+    const anyLogistics = generatePosition({ domain: "any" })
+
+    assert.notEqual(firstIt, lastIt)
+    assert.notEqual(firstLogistics, lastLogistics)
+    assert.ok(!POSITION_BY_DOMAIN.logistics.includes(firstIt))
+    assert.ok(!POSITION_BY_DOMAIN.it.includes(firstLogistics))
+    assert.ok(POSITION_BY_DOMAIN.it.includes(anyIt))
+    assert.ok(POSITION_BY_DOMAIN.logistics.includes(anyLogistics))
+  } finally {
+    Math.random = originalRandom
+  }
 })
 
 test("position generator keeps at least 30 roles in every domain", () => {
@@ -131,5 +161,49 @@ test("position generator keeps at least 30 roles in every domain", () => {
       positions.length >= 30,
       `domain "${domain}" should contain at least 30 positions`
     )
+  }
+})
+
+test("uuid v7 generator returns a RFC 9562-compatible value", () => {
+  const value = generateUuidV7()
+
+  assert.match(
+    value,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+  )
+
+  const timestamp = decodeUuidV7Timestamp(value)
+  const versionNibble = value.replace(/-/g, "").slice(12, 13)
+  const variantNibble = value.replace(/-/g, "").slice(16, 17)
+
+  assert.ok(Math.abs(Date.now() - timestamp) < 60_000)
+  assert.equal(versionNibble, "7")
+  assert.ok(["8", "9", "a", "b"].includes(variantNibble))
+})
+
+test("uuid v7 generator stays lexicographically ordered in a batch", () => {
+  const values = Array.from({ length: 64 }, () => generateUuidV7())
+  const sortedValues = [...values].sort()
+
+  assert.deepEqual(values, sortedValues)
+  assert.equal(new Set(values).size, values.length)
+})
+
+test("uuid v7 generator uses a monotonic counter within one millisecond", () => {
+  const values = Array.from({ length: 64 }, () => generateUuidV7())
+  const groups = new Map<number, string[]>()
+
+  for (const value of values) {
+    const timestamp = decodeUuidV7Timestamp(value)
+    const group = groups.get(timestamp) ?? []
+    group.push(value)
+    groups.set(timestamp, group)
+  }
+
+  for (const group of groups.values()) {
+    const counters = group.map(decodeUuidV7Counter)
+    const sortedCounters = [...counters].sort((left, right) => left - right)
+
+    assert.deepEqual(counters, sortedCounters)
   }
 })

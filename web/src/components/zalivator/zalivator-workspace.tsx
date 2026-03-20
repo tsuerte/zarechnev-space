@@ -149,6 +149,12 @@ export function ZalivatorWorkspace() {
         <CardContent className="space-y-5 p-6">
           <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
 
+          {generator === "uuidV7" ? (
+            <p className="text-sm leading-5 text-muted-foreground">
+              RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
+            </p>
+          ) : null}
+
           {metadata.optionFields.length > 0 ? (
             <>
               <Separator />

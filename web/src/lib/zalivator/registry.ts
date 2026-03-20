@@ -7,6 +7,7 @@ import { generateName } from "@/lib/zalivator/generators/text/name"
 import { generateOrganizationName } from "@/lib/zalivator/generators/text/organization-name"
 import { generatePosition } from "@/lib/zalivator/generators/text/position"
 import { generateSnils } from "@/lib/zalivator/generators/text/snils"
+import { generateUuidV7 } from "@/lib/zalivator/generators/text/uuid-v7"
 import {
   normalizeEmailOptions,
   normalizeInnOptions,
@@ -73,6 +74,11 @@ export const ZALIVATOR_GENERATOR_REGISTRY: Record<
     id: "position",
     normalizeOptions: normalizePositionOptions,
     generateValue: (options) => generatePosition(options as ZalivatorPositionOptions),
+  },
+  uuidV7: {
+    id: "uuidV7",
+    normalizeOptions: () => ({}),
+    generateValue: () => generateUuidV7(),
   },
 }
 

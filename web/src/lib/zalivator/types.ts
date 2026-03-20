@@ -8,6 +8,7 @@ export type ZalivatorGeneratorId =
   | "inn"
   | "kpp"
   | "position"
+  | "uuidV7"
 
 export type ZalivatorGenerateRequest = {
   generator: ZalivatorGeneratorId

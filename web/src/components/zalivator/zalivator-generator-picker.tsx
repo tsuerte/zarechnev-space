@@ -5,6 +5,7 @@ import {
   Building2,
   CreditCard,
   FileDigit,
+  Fingerprint,
   IdCard,
   BriefcaseBusiness,
   Smartphone,
@@ -35,6 +36,7 @@ export function ZalivatorGeneratorPicker({
     inn: FileDigit,
     kpp: CreditCard,
     position: BriefcaseBusiness,
+    uuidV7: Fingerprint,
   } as const
 
   return (

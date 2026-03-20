@@ -147,6 +147,14 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
       },
     ],
   },
+  uuidV7: {
+    id: "uuidV7",
+    label: "UUID v7",
+    description: "RFC 9562 UUID v7 с Unix timestamp в миллисекундах и time-ordered структурой.",
+    kind: "text",
+    supportsUnique: false,
+    optionFields: [],
+  },
 }
 
 export function listZalivatorGeneratorMetadata() {

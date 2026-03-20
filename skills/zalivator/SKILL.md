@@ -63,6 +63,7 @@ Implemented generators:
 - `inn`
 - `kpp`
 - `position`
+- `uuidV7`
 
 The current public response is text-first:
 - `kind`
@@ -127,6 +128,16 @@ Use discovery metadata for web and future plugin configuration UIs.
 `position`
 - `domain: "any" | "it" | "fintech" | "construction" | "retail" | "logistics"`
 - returns a job title from the selected domain
+
+`uuidV7`
+- no options in `v1`
+- must return a canonical lowercase UUID v7 string compatible with RFC 9562
+- uses a 48-bit Unix epoch timestamp in milliseconds in the leading bits
+- must keep version bits set to `7`
+- must keep RFC-compatible variant bits set to `10`
+- must use `crypto.getRandomValues()`, not `Math.random()` or `crypto.randomUUID()`
+- should remain lexicographically time-ordered for batch generation
+- generated values must decode back to a plausible current Unix ms timestamp
 
 Route and executor rules:
 - non-object `options` must fail with `400`

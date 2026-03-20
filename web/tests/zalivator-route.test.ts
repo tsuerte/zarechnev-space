@@ -124,7 +124,17 @@ test("GET /api/zalivator/generators returns discovery metadata", async () => {
       "inn",
       "kpp",
       "position",
+      "uuidV7",
     ]
   )
-  assert.ok(payload.generators.every((generator) => generator.supportsUnique === true))
+  const uniqueById = new Map(
+    payload.generators.map((generator) => [generator.id, generator.supportsUnique])
+  )
+
+  assert.equal(uniqueById.get("uuidV7"), false)
+  assert.ok(
+    payload.generators
+      .filter((generator) => generator.id !== "uuidV7")
+      .every((generator) => generator.supportsUnique === true)
+  )
 })

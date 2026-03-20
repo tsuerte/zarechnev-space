@@ -18,7 +18,7 @@ Apply the repo rules first:
 
 Primary files:
 - `web/src/app/lab/icons/page.tsx`
-- `web/src/app/lab/icons/actions.ts`
+- `web/src/app/api/icons/[id]/route.ts`
 - `web/src/components/icons/icons-workspace.tsx`
 - `web/src/components/icons/icons-toolbar.tsx`
 - `web/src/components/icons/icons-grid.tsx`
@@ -70,7 +70,7 @@ Primary files:
    - read public detail payload
    - write synced files and metadata
 4. `page.tsx` loads public summaries and the first selected detail server-side.
-5. `actions.ts` loads detail payloads for later selection changes.
+5. `/api/icons/[id]` loads detail payloads for later selection changes.
 6. `icons-workspace.tsx` is the client shell for search, selection, detail loading, and page-level preview state.
 7. `icons-toolbar.tsx` owns the public preview controls surface for query, size, stroke width, and color.
 8. `preview.ts` owns preview-only SVG transformation rules and preview control bounds.

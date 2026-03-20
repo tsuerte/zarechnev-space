@@ -2,7 +2,6 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react"
 
-import { loadIconDetailAction } from "@/app/lab/icons/actions"
 import { IconDetailPanel } from "@/components/icons/icon-detail-panel"
 import { IconsGrid } from "@/components/icons/icons-grid"
 import { IconsToolbar } from "@/components/icons/icons-toolbar"
@@ -31,6 +30,24 @@ export function IconsWorkspace({
   const [selectedIcon, setSelectedIcon] = useState<IconFamilyDetail | null>(initialSelectedIcon)
   const [isDetailLoading, setIsDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+
+  async function loadIconDetail(iconId: string, signal: AbortSignal) {
+    const response = await fetch(`/api/icons/${encodeURIComponent(iconId)}`, {
+      method: "GET",
+      signal,
+    })
+
+    const payload = (await response.json()) as {
+      icon: IconFamilyDetail | null
+      error: string | null
+    }
+
+    if (!response.ok || !payload.icon) {
+      throw new Error(payload.error ?? "Не удалось загрузить детали иконки.")
+    }
+
+    return payload.icon
+  }
 
   const filteredIcons = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -73,40 +90,35 @@ export function IconsWorkspace({
       return
     }
 
-    let cancelled = false
+    const abortController = new AbortController()
 
-    async function loadIconDetail() {
+    async function syncSelectedIcon() {
       setIsDetailLoading(true)
       setDetailError(null)
 
       try {
-        const payload = await loadIconDetailAction(iconId)
-
-        if (!payload.icon) {
-          throw new Error(payload.error ?? "Не удалось загрузить детали иконки.")
-        }
-
-        if (!cancelled) {
-          setSelectedIcon(payload.icon)
-        }
+        const icon = await loadIconDetail(iconId, abortController.signal)
+        setSelectedIcon(icon)
       } catch (error) {
-        if (!cancelled) {
-          setSelectedIcon(null)
-          setDetailError(
-            error instanceof Error ? error.message : "Не удалось загрузить детали иконки."
-          )
+        if (abortController.signal.aborted) {
+          return
         }
+
+        setSelectedIcon(null)
+        setDetailError(
+          error instanceof Error ? error.message : "Не удалось загрузить детали иконки."
+        )
       } finally {
-        if (!cancelled) {
+        if (!abortController.signal.aborted) {
           setIsDetailLoading(false)
         }
       }
     }
 
-    void loadIconDetail()
+    void syncSelectedIcon()
 
     return () => {
-      cancelled = true
+      abortController.abort()
     }
   }, [selectedIcon, selectedIconId])
 

@@ -71,6 +71,8 @@ export type ZalivatorNameParts = {
   patronymic: string
 }
 
+const NBSP = "\u00A0"
+
 export function createRandomNameParts(gender: ZalivatorNameOptions["gender"]): ZalivatorNameParts {
   const isFemale = gender === "female" || (gender === "any" && Math.random() >= 0.5)
 
@@ -91,13 +93,29 @@ export function createRandomNameParts(gender: ZalivatorNameOptions["gender"]): Z
 
 export function formatName(parts: ZalivatorNameParts, format: ZalivatorNameOptions["format"]) {
   switch (format) {
-    case "surname-initials":
-      return `${parts.lastName} ${parts.firstName[0]}. ${parts.patronymic[0]}.`
-    case "name-surname":
-      return `${parts.firstName} ${parts.lastName}`
-    case "name-only":
+    case "last-name-only":
+      return parts.lastName
+    case "first-name-only":
       return parts.firstName
-    case "full":
+    case "patronymic-only":
+      return parts.patronymic
+    case "first-patronymic-last":
+      return `${parts.firstName} ${parts.patronymic} ${parts.lastName}`
+    case "first-last":
+      return `${parts.firstName} ${parts.lastName}`
+    case "last-first":
+      return `${parts.lastName} ${parts.firstName}`
+    case "first-last-initial":
+      return `${parts.firstName}${NBSP}${parts.lastName[0]}.`
+    case "last-first-initial":
+      return `${parts.lastName}${NBSP}${parts.firstName[0]}.`
+    case "first-initial-last":
+      return `${parts.firstName[0]}.${NBSP}${parts.lastName}`
+    case "last-initials":
+      return `${parts.lastName}${NBSP}${parts.firstName[0]}.${NBSP}${parts.patronymic[0]}.`
+    case "initials-last":
+      return `${parts.firstName[0]}.${NBSP}${parts.patronymic[0]}.${NBSP}${parts.lastName}`
+    case "last-first-patronymic":
     default:
       return `${parts.lastName} ${parts.firstName} ${parts.patronymic}`
   }

@@ -24,6 +24,18 @@ export {
 } from "@/ui-kit/card"
 export { Checkbox } from "@/ui-kit/checkbox"
 export {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+  FieldTitle,
+} from "@/ui-kit/field"
+export {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -90,6 +102,7 @@ export {
   SidebarTrigger,
 } from "@/ui-kit/sidebar"
 export { Skeleton } from "@/components/ui/skeleton"
+export { Switch } from "@/ui-kit/switch"
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui-kit/tabs"
 export {
   Table,

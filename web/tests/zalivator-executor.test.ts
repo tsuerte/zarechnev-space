@@ -61,7 +61,7 @@ test("executor fails when unique batch cannot be assembled", () => {
         quantity: 9,
         unique: true,
         options: {
-          format: "name-only",
+          format: "first-name-only",
           gender: "female",
         },
       }),

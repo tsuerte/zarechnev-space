@@ -32,18 +32,45 @@ function decodeUuidV7Counter(value: string) {
 }
 
 test("name generator supports configured text formats", () => {
-  const full = generateName({ format: "full", gender: "male" })
-  const initials = generateName({ format: "surname-initials", gender: "female" })
-  const nameOnly = generateName({ format: "name-only", gender: "female" })
+  const nbsp = "\u00A0"
+  const full = generateName({ format: "last-first-patronymic", gender: "male" })
+  const lastNameOnly = generateName({ format: "last-name-only", gender: "female" })
+  const firstNameOnly = generateName({ format: "first-name-only", gender: "female" })
+  const patronymicOnly = generateName({ format: "patronymic-only", gender: "male" })
+  const firstPatronymicLast = generateName({
+    format: "first-patronymic-last",
+    gender: "male",
+  })
+  const firstLast = generateName({ format: "first-last", gender: "male" })
+  const lastFirst = generateName({ format: "last-first", gender: "female" })
+  const firstLastInitial = generateName({ format: "first-last-initial", gender: "male" })
+  const lastFirstInitial = generateName({ format: "last-first-initial", gender: "female" })
+  const firstInitialLast = generateName({ format: "first-initial-last", gender: "male" })
+  const lastInitials = generateName({ format: "last-initials", gender: "male" })
+  const initialsLast = generateName({ format: "initials-last", gender: "male" })
 
   assert.match(full, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
-  assert.match(initials, /^[А-ЯЁ][а-яё]+ [А-Я]\. [А-Я]\.$/)
-  assert.match(nameOnly, /^[А-ЯЁ][а-яё]+$/)
+  assert.match(lastNameOnly, /^[А-ЯЁ][а-яё]+$/)
+  assert.match(firstNameOnly, /^[А-ЯЁ][а-яё]+$/)
+  assert.match(patronymicOnly, /^[А-ЯЁ][а-яё]+$/)
+  assert.match(firstPatronymicLast, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
+  assert.match(firstLast, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
+  assert.match(lastFirst, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
+  assert.match(firstLastInitial, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.$/)
+  assert.match(lastFirstInitial, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.$/)
+  assert.match(firstInitialLast, /^[А-Я]\.\u00A0[А-ЯЁ][а-яё]+$/)
+  assert.match(lastInitials, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.\u00A0[А-Я]\.$/)
+  assert.match(initialsLast, /^[А-Я]\.\u00A0[А-Я]\.\u00A0[А-ЯЁ][а-яё]+$/)
+  assert.ok(firstLastInitial.includes(nbsp))
+  assert.ok(lastFirstInitial.includes(nbsp))
+  assert.ok(firstInitialLast.includes(nbsp))
+  assert.ok(lastInitials.includes(nbsp))
+  assert.ok(initialsLast.includes(nbsp))
 })
 
 test("name generator respects gender option", () => {
-  const female = generateName({ format: "full", gender: "female" })
-  const male = generateName({ format: "full", gender: "male" })
+  const female = generateName({ format: "last-first-patronymic", gender: "female" })
+  const male = generateName({ format: "last-first-patronymic", gender: "male" })
 
   assert.match(female, /(Иванова|Петрова|Соколова|Козлова|Смирнова|Новикова|Романова|Васильева)/)
   assert.match(male, /(Иванов|Петров|Соколов|Козлов|Смирнов|Новиков|Романов|Васильев)/)

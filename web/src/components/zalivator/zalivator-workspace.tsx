@@ -7,14 +7,18 @@ import {
   CardContent,
   Checkbox,
   ChoiceList,
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldLabel,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
   Separator,
+  Switch,
   Textarea,
   ToggleGroup,
   ToggleGroupItem,
@@ -117,75 +121,84 @@ function renderOptionField(
   if (field.control === "segmented") {
     if (field.options.length > 4) {
       return (
-        <div key={field.key} className="space-y-2.5">
-          <Label>{field.label}</Label>
-          <ChoiceList
-            value={typeof value === "string" ? value : undefined}
-            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
-            options={field.options}
-          />
-        </div>
+        <Field key={field.key}>
+          <FieldLabel>{field.label}</FieldLabel>
+          <FieldContent>
+            <ChoiceList
+              value={typeof value === "string" ? value : undefined}
+              onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
+              options={field.options}
+              showIndex={field.key === "format" && field.label === "Формат"}
+            />
+          </FieldContent>
+        </Field>
       )
     }
 
     return (
-      <div key={field.key} className="space-y-2.5">
-        <Label>{field.label}</Label>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          spacing={1}
-          value={typeof value === "string" ? value : undefined}
-          onValueChange={(nextValue) => {
-            if (nextValue) {
-              onChange(field.key, nextValue, "immediate")
-            }
-          }}
-          className="flex flex-wrap justify-start"
-        >
-          {field.options.map((option) => (
-            <ToggleGroupItem key={option.value} value={option.value} className="px-3">
-              {option.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            spacing={1}
+            value={typeof value === "string" ? value : undefined}
+            onValueChange={(nextValue) => {
+              if (nextValue) {
+                onChange(field.key, nextValue, "immediate")
+              }
+            }}
+            className="flex flex-wrap justify-start"
+          >
+            {field.options.map((option) => (
+              <ToggleGroupItem key={option.value} value={option.value}>
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </FieldContent>
+      </Field>
     )
   }
 
   if (field.control === "select") {
     if (field.options.length > 4) {
       return (
-        <div key={field.key} className="space-y-2.5">
-          <Label>{field.label}</Label>
-          <ChoiceList
-            value={typeof value === "string" ? value : undefined}
-            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
-            options={field.options}
-          />
-        </div>
+        <Field key={field.key}>
+          <FieldLabel>{field.label}</FieldLabel>
+          <FieldContent>
+            <ChoiceList
+              value={typeof value === "string" ? value : undefined}
+              onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
+              options={field.options}
+            />
+          </FieldContent>
+        </Field>
       )
     }
 
     return (
-      <div key={field.key} className="space-y-2.5">
-        <Label>{field.label}</Label>
-        <Select
-          value={typeof value === "string" ? value : undefined}
-          onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={field.label} />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <Select
+            value={typeof value === "string" ? value : undefined}
+            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={field.label} />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldContent>
+      </Field>
     )
   }
 
@@ -194,83 +207,97 @@ function renderOptionField(
     const options = resolveFieldChoices(field, currentValues)
 
     return (
-      <div key={field.key} className="space-y-2.5">
-        <Label>{field.label}</Label>
-        <div className={field.layout === "stacked" ? "space-y-2" : "grid gap-2 sm:grid-cols-2"}>
-          {options.map((option) => {
-            const checked = selectedValues.includes(option.value)
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <FieldGroup
+            data-slot={field.layout === "stacked" ? "checkbox-group" : undefined}
+            className={field.layout === "stacked" ? undefined : "grid gap-2 sm:grid-cols-2"}
+          >
+            {options.map((option) => {
+              const checked = selectedValues.includes(option.value)
 
-            return (
-              <label
-                key={option.value}
-                className="flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm"
-              >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={(nextChecked) => {
-                    const current = Array.isArray(value) ? value : []
+              return (
+                <Field key={option.value} orientation="horizontal">
+                  <Switch
+                    size="sm"
+                    id={`${field.key}-${option.value}`}
+                    checked={checked}
+                    onCheckedChange={(nextChecked) => {
+                      const current = Array.isArray(value) ? value : []
 
-                    if (nextChecked === true) {
-                      onChange(field.key, [...current, option.value], "immediate")
-                    } else {
-                      onChange(
-                        field.key,
-                        current.filter((item) => item !== option.value),
-                        "immediate"
-                      )
-                    }
-                  }}
-                />
-                <span>{option.label}</span>
-              </label>
-            )
-          })}
-        </div>
-      </div>
+                      if (nextChecked === true) {
+                        onChange(field.key, [...current, option.value], "immediate")
+                      } else {
+                        onChange(
+                          field.key,
+                          current.filter((item) => item !== option.value),
+                          "immediate"
+                        )
+                      }
+                    }}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`${field.key}-${option.value}`}>
+                      {option.label}
+                    </FieldLabel>
+                  </FieldContent>
+                </Field>
+              )
+            })}
+          </FieldGroup>
+        </FieldContent>
+      </Field>
     )
   }
 
   if (field.control === "textarea") {
     return (
-      <div key={field.key} className="space-y-2.5">
-        <Label>{field.label}</Label>
-        <Textarea
-          value={typeof value === "string" ? value : ""}
-          onChange={(event) => onChange(field.key, event.target.value, "debounced")}
-          placeholder={field.placeholder}
-          rows={field.rows}
-        />
-      </div>
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <Textarea
+            value={typeof value === "string" ? value : ""}
+            onChange={(event) => onChange(field.key, event.target.value, "debounced")}
+            placeholder={field.placeholder}
+            rows={field.rows}
+          />
+        </FieldContent>
+      </Field>
     )
   }
 
   if (field.control === "number") {
     return (
-      <div key={field.key} className="space-y-2.5">
-        <Label>{field.label}</Label>
-        <Input
-          type="number"
-          value={typeof value === "string" ? value : ""}
-          onChange={(event) => onChange(field.key, event.target.value, "debounced")}
-          placeholder={field.placeholder}
-          min={field.min}
-          max={field.max}
-          step={field.step}
-        />
-      </div>
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <Input
+            type="number"
+            value={typeof value === "string" ? value : ""}
+            onChange={(event) => onChange(field.key, event.target.value, "debounced")}
+            placeholder={field.placeholder}
+            min={field.min}
+            max={field.max}
+            step={field.step}
+          />
+        </FieldContent>
+      </Field>
     )
   }
 
   return (
-    <div key={field.key} className="space-y-2.5">
-      <Label>{field.label}</Label>
-      <Input
-        value={typeof value === "string" ? value : ""}
-        onChange={(event) => onChange(field.key, event.target.value, "debounced")}
-        placeholder={field.placeholder}
-        inputMode={field.inputMode}
-      />
-    </div>
+    <Field key={field.key}>
+      <FieldLabel>{field.label}</FieldLabel>
+      <FieldContent>
+        <Input
+          value={typeof value === "string" ? value : ""}
+          onChange={(event) => onChange(field.key, event.target.value, "debounced")}
+          placeholder={field.placeholder}
+          inputMode={field.inputMode}
+        />
+      </FieldContent>
+    </Field>
   )
 }
 
@@ -505,7 +532,7 @@ export function ZalivatorWorkspace() {
                 <ZalivatorQuantityControl value={quantity} onChange={handleQuantityChange} />
 
                 {metadata.supportsUnique ? (
-                  <section className="flex items-start gap-3">
+                  <Field orientation="horizontal">
                     <Checkbox
                       id="zalivator-unique"
                       checked={unique}
@@ -513,15 +540,11 @@ export function ZalivatorWorkspace() {
                         autoRunModeRef.current = "immediate"
                         setUnique(checked === true)
                       }}
-                      className="mt-0.5"
                     />
-                    <div className="space-y-1">
-                      <Label htmlFor="zalivator-unique">Только уникальные</Label>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        Значения не будут повторяться внутри одного набора.
-                      </p>
-                    </div>
-                  </section>
+                    <FieldContent>
+                      <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
+                    </FieldContent>
+                  </Field>
                 ) : null}
               </section>
             </div>

@@ -7,10 +7,18 @@ import {
 } from "@/lib/zalivator/measurement-catalog"
 
 export const ZALIVATOR_NAME_FORMATS = [
-  "full",
-  "surname-initials",
-  "name-surname",
-  "name-only",
+  "last-name-only",
+  "first-name-only",
+  "patronymic-only",
+  "last-first-patronymic",
+  "first-patronymic-last",
+  "first-last",
+  "last-first",
+  "first-last-initial",
+  "last-first-initial",
+  "first-initial-last",
+  "last-initials",
+  "initials-last",
 ] as const
 
 export type ZalivatorNameFormat = (typeof ZALIVATOR_NAME_FORMATS)[number]
@@ -134,7 +142,7 @@ export function normalizeNameOptions(
 
   const normalizedFormat =
     format === undefined
-      ? "full"
+      ? ZALIVATOR_NAME_FORMATS[0]
       : typeof format === "string" &&
           ZALIVATOR_NAME_FORMATS.includes(format as ZalivatorNameFormat)
         ? (format as ZalivatorNameFormat)

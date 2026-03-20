@@ -30,10 +30,54 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
         label: "Формат",
         control: "segmented",
         options: [
-          { value: "full", label: "Полное" },
-          { value: "surname-initials", label: "С инициалами" },
-          { value: "name-surname", label: "Имя + фамилия" },
-          { value: "name-only", label: "Только имя" },
+          {
+            value: "last-name-only",
+            label: "Пупкин",
+          },
+          {
+            value: "first-name-only",
+            label: "Василий",
+          },
+          {
+            value: "patronymic-only",
+            label: "Иванович",
+          },
+          {
+            value: "last-first-patronymic",
+            label: "Пупкин Василий Иванович",
+          },
+          {
+            value: "first-patronymic-last",
+            label: "Василий Иванович Пупкин",
+          },
+          {
+            value: "first-last",
+            label: "Василий Пупкин",
+          },
+          {
+            value: "last-first",
+            label: "Пупкин Василий",
+          },
+          {
+            value: "first-last-initial",
+            label: "Василий\u00A0П.",
+          },
+          {
+            value: "last-first-initial",
+            label: "Пупкин\u00A0В.",
+          },
+          {
+            value: "first-initial-last",
+            label: "В.\u00A0Пупкин",
+          },
+          {
+            value: "last-initials",
+            label: "Пупкин\u00A0В.\u00A0И.",
+          },
+          {
+            value: "initials-last",
+            label: "В.\u00A0И.\u00A0Пупкин",
+          },
         ],
       },
       {

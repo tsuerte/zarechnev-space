@@ -204,7 +204,7 @@ When that happens:
   - control row states
   - micro-spacing already handled by `Field`, `FieldGroup`, or `FieldContent`
 - When building Zalivator settings UIs, prefer `Field`, `FieldGroup`, and `FieldContent` for control composition instead of hand-written `flex` wrappers.
-- Treat `ui-kit` only as the public import boundary; do not use it as a styling/customization layer.
+- Treat `ui-kit` as the only shared project-level customization layer. If Zalivator needs shared UI behavior beyond stock shadcn, encode it there rather than in usage-layer or `components/ui`.
 - Keep generator and option selection close to standard `ToggleGroup` / `Input` / `Label` patterns unless a stronger reason exists.
 - Prefer `Select` over wrapped segmented controls when the choice list gets long or visually noisy.
 - For generator-specific option UIs, metadata should stay expressive enough to drive `select`, `number`, `checkbox-group`, and `textarea` controls without hardcoding generator-specific React branches.

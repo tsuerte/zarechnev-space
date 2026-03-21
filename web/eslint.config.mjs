@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
             {
               group: ["@/components/ui/*"],
               message:
-                "Import via '@/ui-kit'. Treat 'src/ui-kit/*' as the public entrypoint and keep shadcn customization out of app code.",
+                "Import via '@/ui-kit'. Keep 'src/components/ui/*' literal shadcn source and put shared project-level UI customization in 'src/ui-kit/*'.",
             },
           ],
         },

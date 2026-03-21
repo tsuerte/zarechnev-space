@@ -71,7 +71,7 @@ Primary files:
 - The canonical pipeline is shared infrastructure. Be careful: changing `pipeline.ts` can affect both the optimizer and icons sync.
 - App code must import UI only from `@/ui-kit`.
 - Prefer official shadcn structure and composition patterns before inventing optimizer-specific wrappers.
-- Treat `ui-kit` as the public import boundary, not as a styling/customization layer.
+- Treat `ui-kit` as the only shared project-level customization layer. Put shared optimizer UI policy there, not in usage-layer.
 - Keep usage-layer classes limited to layout composition.
 - Do not reintroduce separate `Single` and `Batch` product modes unless explicitly requested.
 - Do not add manual optimization settings or expose raw SVGO tuning unless explicitly requested.

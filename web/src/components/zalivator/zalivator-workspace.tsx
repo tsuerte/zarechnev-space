@@ -17,7 +17,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Separator,
   Switch,
   Textarea,
   ToggleGroup,
@@ -509,42 +508,32 @@ export function ZalivatorWorkspace() {
       </aside>
 
       <Card className="min-h-0 overflow-hidden rounded-none border-0 border-b ring-0 shadow-none lg:h-full lg:border-r lg:border-b-0">
-        <CardContent className="flex h-full min-h-0 flex-col p-0">
-          <div className="min-h-0 flex-1 overflow-auto">
-            <div className="space-y-6 px-5 py-5 lg:px-6 lg:py-6">
-              {generator === "uuidV7" ? (
-                <p className="text-sm leading-5 text-muted-foreground">
-                  RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
-                </p>
-              ) : null}
+        <CardContent className="min-h-0 flex-1 overflow-auto space-y-4 px-4 pb-4 pt-3">
+          {generator === "uuidV7" ? (
+            <p className="text-sm leading-5 text-muted-foreground">
+              RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
+            </p>
+          ) : null}
 
-              {metadata.optionFields.length > 0 ? (
-                <section className="space-y-5">
-                  {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
-                </section>
-              ) : null}
+          {metadata.optionFields.length > 0
+            ? renderOptionFields(metadata.optionFields, options, handleOptionChange)
+            : null}
 
-              <Separator />
+          <ZalivatorQuantityControl value={quantity} onChange={handleQuantityChange} />
 
-              <section className="space-y-5">
-                <ZalivatorQuantityControl value={quantity} onChange={handleQuantityChange} />
-
-                {metadata.supportsUnique ? (
-                  <Field orientation="horizontal">
-                    <Checkbox
-                      id="zalivator-unique"
-                      checked={unique}
-                      onCheckedChange={(checked) => {
-                        autoRunModeRef.current = "immediate"
-                        setUnique(checked === true)
-                      }}
-                    />
-                    <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
-                  </Field>
-                ) : null}
-              </section>
-            </div>
-          </div>
+          {metadata.supportsUnique ? (
+            <Field orientation="horizontal">
+              <Checkbox
+                id="zalivator-unique"
+                checked={unique}
+                onCheckedChange={(checked) => {
+                  autoRunModeRef.current = "immediate"
+                  setUnique(checked === true)
+                }}
+              />
+              <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
+            </Field>
+          ) : null}
         </CardContent>
       </Card>
 

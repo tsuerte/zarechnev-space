@@ -90,7 +90,7 @@ Primary files:
 - Do not silently expand preview controls into "export customized icon" behavior unless explicitly requested.
 - App code must import UI only from `@/ui-kit`.
 - Prefer official shadcn composition patterns before inventing icon-catalog-specific wrappers.
-- Treat `ui-kit` as the public import boundary, not as a styling/customization layer.
+- Treat `ui-kit` as the only shared project-level customization layer. Keep shared icon-catalog UI policy there, not in usage-layer or `components/ui`.
 - Keep usage-layer classes limited to layout composition.
 - Be careful with `pipeline.ts` changes: icons sync shares that canonical SVG pipeline with `/lab/svg`.
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { unstable_cache } from 'next/cache'
-import { Inter, IBM_Plex_Sans } from "next/font/google"
+import { IBM_Plex_Sans } from "next/font/google"
 import Script from 'next/script'
 import { AppShell } from '@/components/app-shell'
 import {
@@ -19,13 +19,6 @@ import './globals.css'
 import { cn } from "@/lib/utils";
 
 const ibmPlexSans = IBM_Plex_Sans({subsets:['latin'],variable:'--font-sans'});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin", "cyrillic"],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -77,7 +70,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ru" className={cn("font-sans", ibmPlexSans.variable)}>
-      <body className={inter.variable}>
+      <body>
         <TooltipProvider>
           <AppShell sidebarCaseItems={sidebarCaseItems}>{children}</AppShell>
         </TooltipProvider>

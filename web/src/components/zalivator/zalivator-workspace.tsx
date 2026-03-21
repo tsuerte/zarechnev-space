@@ -3,9 +3,6 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 
 import {
-  Card,
-  CardContent,
-  Checkbox,
   ChoiceList,
   Field,
   FieldContent,
@@ -22,7 +19,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/ui-kit"
-import { getZalivatorGeneratorMetadata } from "@/lib/zalivator/metadata"
+import {
+  getZalivatorGeneratorMetadata,
+  listZalivatorGeneratorMetadata,
+  ZALIVATOR_QUANTITY_MAX,
+  ZALIVATOR_QUANTITY_MIN,
+} from "@/lib/zalivator/metadata"
 import type {
   ZalivatorGenerateResponse,
   ZalivatorGeneratorId,
@@ -30,15 +32,161 @@ import type {
   ZalivatorOptionField,
 } from "@/lib/zalivator/types"
 import { ZalivatorGeneratorPicker } from "@/components/zalivator/zalivator-generator-picker"
-import { ZalivatorQuantityControl } from "@/components/zalivator/zalivator-quantity-control"
 import { ZalivatorResultList } from "@/components/zalivator/zalivator-result-list"
 
 type ZalivatorOptionValue = string | string[]
 type ZalivatorAutoRunMode = "immediate" | "debounced"
 const ZALIVATOR_AUTO_RUN_DEBOUNCE_MS = 400
+const ZALIVATOR_PERSISTED_STATE_KEY = "zalivator:workspace:v2"
+const ZALIVATOR_LEGACY_PERSISTED_STATE_KEY = "zalivator:workspace:v1"
+const ZALIVATOR_PERSIST_DEBOUNCE_MS = 200
+const ZALIVATOR_DEFAULT_QUANTITY = 10
+
+type ZalivatorGeneratorDraft = {
+  options: Record<string, unknown>
+  quantity: number
+  unique: boolean
+}
+
+type ZalivatorPersistedState = {
+  generator: ZalivatorGeneratorId
+  drafts: Partial<Record<ZalivatorGeneratorId, ZalivatorGeneratorDraft>>
+  savedAt: number
+}
+
+type ZalivatorLegacyPersistedState = {
+  generator: ZalivatorGeneratorId
+  quantity: number
+  unique: boolean
+  options: Record<string, unknown>
+  savedAt: number
+}
 
 function isAbortError(cause: unknown) {
   return cause instanceof Error && cause.name === "AbortError"
+}
+
+function isPersistedState(
+  value: unknown
+): value is ZalivatorPersistedState {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false
+  }
+
+  const candidate = value as Partial<ZalivatorPersistedState>
+
+  return (
+    typeof candidate.generator === "string" &&
+    listZalivatorGeneratorMetadata().some((generator) => generator.id === candidate.generator) &&
+    candidate.drafts !== null &&
+    typeof candidate.drafts === "object" &&
+    !Array.isArray(candidate.drafts) &&
+    typeof candidate.savedAt === "number" &&
+    Number.isFinite(candidate.savedAt)
+  )
+}
+
+function isLegacyPersistedState(
+  value: unknown
+): value is ZalivatorLegacyPersistedState {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false
+  }
+
+  const candidate = value as Partial<ZalivatorLegacyPersistedState>
+
+  return (
+    typeof candidate.generator === "string" &&
+    listZalivatorGeneratorMetadata().some((generator) => generator.id === candidate.generator) &&
+    typeof candidate.quantity === "number" &&
+    Number.isFinite(candidate.quantity) &&
+    typeof candidate.unique === "boolean" &&
+    candidate.options !== null &&
+    typeof candidate.options === "object" &&
+    !Array.isArray(candidate.options) &&
+    typeof candidate.savedAt === "number" &&
+    Number.isFinite(candidate.savedAt)
+  )
+}
+
+function normalizePersistedQuantity(quantity: number) {
+  return Math.min(
+    ZALIVATOR_QUANTITY_MAX,
+    Math.max(ZALIVATOR_QUANTITY_MIN, Math.round(quantity))
+  )
+}
+
+function buildDefaultDraft(generator: ZalivatorGeneratorId): ZalivatorGeneratorDraft {
+  return {
+    options: buildDefaultOptions(generator),
+    quantity: ZALIVATOR_DEFAULT_QUANTITY,
+    unique: false,
+  }
+}
+
+function restoreOptions(
+  generator: ZalivatorGeneratorId,
+  persistedOptions: Record<string, unknown>
+) {
+  const metadata = getZalivatorGeneratorMetadata(generator)
+  const restoredOptions = buildDefaultOptions(generator)
+
+  for (const field of metadata.optionFields) {
+    const nextValue = persistedOptions[field.key]
+
+    if (field.control === "segmented" || field.control === "select") {
+      if (
+        typeof nextValue === "string" &&
+        field.options.some((option) => option.value === nextValue)
+      ) {
+        restoredOptions[field.key] = nextValue
+      }
+      continue
+    }
+
+    if (field.control === "text" || field.control === "textarea" || field.control === "number") {
+      if (typeof nextValue === "string") {
+        restoredOptions[field.key] = nextValue
+      }
+      continue
+    }
+
+    if (field.control === "checkbox-group" && Array.isArray(nextValue)) {
+      const allowedValues = new Set(resolveFieldChoices(field, restoredOptions).map((option) => option.value))
+      restoredOptions[field.key] = nextValue.filter(
+        (item): item is string => typeof item === "string" && allowedValues.has(item)
+      )
+    }
+  }
+
+  return restoredOptions
+}
+
+function restoreDraft(
+  generator: ZalivatorGeneratorId,
+  persistedDraft: unknown
+): ZalivatorGeneratorDraft {
+  const metadata = getZalivatorGeneratorMetadata(generator)
+  const defaultDraft = buildDefaultDraft(generator)
+
+  if (!persistedDraft || typeof persistedDraft !== "object" || Array.isArray(persistedDraft)) {
+    return defaultDraft
+  }
+
+  const candidate = persistedDraft as Partial<ZalivatorGeneratorDraft>
+  const options =
+    candidate.options && typeof candidate.options === "object" && !Array.isArray(candidate.options)
+      ? candidate.options
+      : {}
+
+  return {
+    options: restoreOptions(generator, options),
+    quantity:
+      typeof candidate.quantity === "number" && Number.isFinite(candidate.quantity)
+        ? normalizePersistedQuantity(candidate.quantity)
+        : defaultDraft.quantity,
+    unique: metadata.supportsUnique ? candidate.unique === true : false,
+  }
 }
 
 function resolveFieldChoices(
@@ -127,7 +275,6 @@ function renderOptionField(
               value={typeof value === "string" ? value : undefined}
               onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
               options={field.options}
-              showIndex={field.key === "format" && field.label === "Формат"}
             />
           </FieldContent>
         </Field>
@@ -354,26 +501,40 @@ function buildPayloadOptions(
 
 export function ZalivatorWorkspace() {
   const [generator, setGenerator] = useState<ZalivatorGeneratorId>("name")
-  const [quantity, setQuantity] = useState(10)
-  const [unique, setUnique] = useState(false)
-  const [options, setOptions] = useState<Record<string, ZalivatorOptionValue>>(() =>
-    buildDefaultOptions("name")
-  )
+  const [draftsByGenerator, setDraftsByGenerator] = useState<
+    Partial<Record<ZalivatorGeneratorId, ZalivatorGeneratorDraft>>
+  >(() => ({
+    name: buildDefaultDraft("name"),
+  }))
   const [result, setResult] = useState<ZalivatorGenerateResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, setIsPending] = useState(false)
+  const [hasRestoredState, setHasRestoredState] = useState(false)
   const autoRunModeRef = useRef<ZalivatorAutoRunMode>("immediate")
   const hasAutoGeneratedRef = useRef(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const autoRunTimeoutRef = useRef<number | null>(null)
+  const persistTimeoutRef = useRef<number | null>(null)
 
   const metadata = getZalivatorGeneratorMetadata(generator)
+  const activeDraft = draftsByGenerator[generator] ?? buildDefaultDraft(generator)
+  const options = activeDraft.options as Record<string, ZalivatorOptionValue>
+  const quantity = activeDraft.quantity
+  const unique = activeDraft.unique
 
   const handleGeneratorChange = (nextGenerator: ZalivatorGeneratorId) => {
     autoRunModeRef.current = "immediate"
     setGenerator(nextGenerator)
-    setOptions(buildDefaultOptions(nextGenerator))
-    setUnique(false)
+    setDraftsByGenerator((current) => {
+      if (current[nextGenerator]) {
+        return current
+      }
+
+      return {
+        ...current,
+        [nextGenerator]: buildDefaultDraft(nextGenerator),
+      }
+    })
     setResult(null)
     setError(null)
   }
@@ -384,9 +545,11 @@ export function ZalivatorWorkspace() {
     mode: ZalivatorAutoRunMode = "immediate"
   ) => {
     autoRunModeRef.current = mode
-    setOptions((current) => {
+    setDraftsByGenerator((current) => {
+      const currentDraft = current[generator] ?? buildDefaultDraft(generator)
+      const currentOptions = currentDraft.options as Record<string, ZalivatorOptionValue>
       const nextOptions = {
-        ...current,
+        ...currentOptions,
         [key]: Array.isArray(nextValue) ? [...new Set(nextValue)] : nextValue,
       }
       const nextMetadata = getZalivatorGeneratorMetadata(generator)
@@ -399,7 +562,13 @@ export function ZalivatorWorkspace() {
         }
       }
 
-      return nextOptions
+      return {
+        ...current,
+        [generator]: {
+          ...currentDraft,
+          options: nextOptions,
+        },
+      }
     })
   }
 
@@ -408,7 +577,17 @@ export function ZalivatorWorkspace() {
     mode: ZalivatorAutoRunMode = "immediate"
   ) => {
     autoRunModeRef.current = mode
-    setQuantity(nextQuantity)
+    setDraftsByGenerator((current) => {
+      const currentDraft = current[generator] ?? buildDefaultDraft(generator)
+
+      return {
+        ...current,
+        [generator]: {
+          ...currentDraft,
+          quantity: nextQuantity,
+        },
+      }
+    })
   }
 
   const runGenerate = useCallback(async () => {
@@ -471,11 +650,106 @@ export function ZalivatorWorkspace() {
       if (autoRunTimeoutRef.current !== null) {
         window.clearTimeout(autoRunTimeoutRef.current)
       }
+      if (persistTimeoutRef.current !== null) {
+        window.clearTimeout(persistTimeoutRef.current)
+      }
       abortControllerRef.current?.abort()
     }
   }, [])
 
   useEffect(() => {
+    try {
+      const persistedState =
+        window.localStorage.getItem(ZALIVATOR_PERSISTED_STATE_KEY) ??
+        window.localStorage.getItem(ZALIVATOR_LEGACY_PERSISTED_STATE_KEY)
+
+      if (!persistedState) {
+        return
+      }
+
+      const parsed = JSON.parse(persistedState) as unknown
+
+      if (isPersistedState(parsed)) {
+        const restoredGenerator = parsed.generator
+        const restoredDrafts: Partial<Record<ZalivatorGeneratorId, ZalivatorGeneratorDraft>> = {}
+
+        for (const generatorMetadata of listZalivatorGeneratorMetadata()) {
+          const draft = parsed.drafts[generatorMetadata.id]
+
+          if (draft) {
+            restoredDrafts[generatorMetadata.id] = restoreDraft(generatorMetadata.id, draft)
+          }
+        }
+
+        if (!restoredDrafts[restoredGenerator]) {
+          restoredDrafts[restoredGenerator] = buildDefaultDraft(restoredGenerator)
+        }
+
+        autoRunModeRef.current = "immediate"
+        setGenerator(restoredGenerator)
+        setDraftsByGenerator(restoredDrafts)
+        setResult(null)
+        setError(null)
+        return
+      }
+
+      if (isLegacyPersistedState(parsed)) {
+        const restoredGenerator = parsed.generator
+        const restoredDrafts: Partial<Record<ZalivatorGeneratorId, ZalivatorGeneratorDraft>> = {
+          [restoredGenerator]: restoreDraft(restoredGenerator, parsed),
+        }
+
+        autoRunModeRef.current = "immediate"
+        setGenerator(restoredGenerator)
+        setDraftsByGenerator(restoredDrafts)
+        setResult(null)
+        setError(null)
+        return
+      }
+
+      window.localStorage.removeItem(ZALIVATOR_PERSISTED_STATE_KEY)
+      window.localStorage.removeItem(ZALIVATOR_LEGACY_PERSISTED_STATE_KEY)
+    } catch {
+      window.localStorage.removeItem(ZALIVATOR_PERSISTED_STATE_KEY)
+      window.localStorage.removeItem(ZALIVATOR_LEGACY_PERSISTED_STATE_KEY)
+    } finally {
+      setHasRestoredState(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!hasRestoredState) {
+      return
+    }
+
+    persistTimeoutRef.current = window.setTimeout(() => {
+      const persistedState: ZalivatorPersistedState = {
+        generator,
+        drafts: draftsByGenerator,
+        savedAt: Date.now(),
+      }
+
+      window.localStorage.setItem(
+        ZALIVATOR_PERSISTED_STATE_KEY,
+        JSON.stringify(persistedState)
+      )
+      window.localStorage.removeItem(ZALIVATOR_LEGACY_PERSISTED_STATE_KEY)
+      persistTimeoutRef.current = null
+    }, ZALIVATOR_PERSIST_DEBOUNCE_MS)
+
+    return () => {
+      if (persistTimeoutRef.current !== null) {
+        window.clearTimeout(persistTimeoutRef.current)
+        persistTimeoutRef.current = null
+      }
+    }
+  }, [draftsByGenerator, generator, hasRestoredState])
+
+  useEffect(() => {
+    if (!hasRestoredState) {
+      return
+    }
+
     if (!hasAutoGeneratedRef.current) {
       hasAutoGeneratedRef.current = true
       void runGenerate()
@@ -497,7 +771,7 @@ export function ZalivatorWorkspace() {
     }
 
     void runGenerate()
-  }, [generator, options, quantity, unique, runGenerate])
+  }, [generator, hasRestoredState, options, quantity, unique, runGenerate])
 
   return (
     <main className="flex h-full min-h-0 w-full flex-col gap-0 lg:grid lg:grid-cols-[220px_360px_minmax(0,1fr)] lg:overflow-hidden">
@@ -507,38 +781,54 @@ export function ZalivatorWorkspace() {
         </div>
       </aside>
 
-      <Card className="min-h-0 overflow-hidden rounded-none border-0 border-b ring-0 shadow-none lg:h-full lg:border-r lg:border-b-0">
-        <CardContent className="min-h-0 flex-1 overflow-auto space-y-4 px-4 pb-4 pt-3">
-          {generator === "uuidV7" ? (
-            <p className="text-sm leading-5 text-muted-foreground">
-              RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
-            </p>
-          ) : null}
+      <section className="min-h-0 border-b lg:h-full lg:border-r lg:border-b-0">
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="min-h-0 flex-1 overflow-auto p-4">
+            <div className="space-y-4">
+              {generator === "uuidV7" ? (
+                <p className="text-sm leading-5 text-muted-foreground">
+                  RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
+                </p>
+              ) : null}
 
-          {metadata.optionFields.length > 0
-            ? renderOptionFields(metadata.optionFields, options, handleOptionChange)
-            : null}
-
-          <ZalivatorQuantityControl value={quantity} onChange={handleQuantityChange} />
-
-          {metadata.supportsUnique ? (
-            <Field orientation="horizontal">
-              <Checkbox
-                id="zalivator-unique"
-                checked={unique}
-                onCheckedChange={(checked) => {
-                  autoRunModeRef.current = "immediate"
-                  setUnique(checked === true)
-                }}
-              />
-              <FieldLabel htmlFor="zalivator-unique">Только уникальные</FieldLabel>
-            </Field>
-          ) : null}
-        </CardContent>
-      </Card>
+              {metadata.optionFields.length > 0 ? (
+                <FieldGroup className="gap-4">
+                  {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
+                </FieldGroup>
+              ) : generator !== "uuidV7" ? (
+                <p className="text-sm leading-5 text-muted-foreground">
+                  Дополнительных настроек нет. Набор обновляется сразу по базовому сценарию.
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:h-full">
-        <ZalivatorResultList result={result} isPending={isPending} error={error} />
+        <ZalivatorResultList
+          result={result}
+          isPending={isPending}
+          error={error}
+          quantity={quantity}
+          onQuantityChange={handleQuantityChange}
+          unique={unique}
+          supportsUnique={metadata.supportsUnique}
+          onUniqueChange={(nextValue) => {
+            autoRunModeRef.current = "immediate"
+            setDraftsByGenerator((current) => {
+              const currentDraft = current[generator] ?? buildDefaultDraft(generator)
+
+              return {
+                ...current,
+                [generator]: {
+                  ...currentDraft,
+                  unique: nextValue,
+                },
+              }
+            })
+          }}
+        />
       </section>
     </main>
   )

@@ -100,7 +100,7 @@ export function ZalivatorResultList({
   }
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col">
+    <section className="flex h-full min-h-0 flex-1 flex-col">
       <header className="border-b px-4 py-3">
         <div className="flex flex-wrap items-center gap-5">
           <Button onClick={copyAll} disabled={!hasValues}>
@@ -108,19 +108,18 @@ export function ZalivatorResultList({
             {isAllCopied ? "Скопировано" : "Копировать"}
           </Button>
           <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <p className="text-sm font-medium">Количество</p>
+            <p className="text-sm font-medium">Кол-во</p>
             <ZalivatorQuantityControl value={quantity} onChange={onQuantityChange} />
           </div>
           {supportsUnique ? (
             <Field orientation="horizontal" className="w-auto gap-2">
               <Switch
                 id="zalivator-result-unique"
-                size="sm"
                 checked={unique}
                 onCheckedChange={(checked) => onUniqueChange(checked === true)}
               />
               <FieldLabel htmlFor="zalivator-result-unique">
-                Только уникальные
+                Без повторов
               </FieldLabel>
             </Field>
           ) : null}

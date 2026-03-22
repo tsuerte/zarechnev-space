@@ -773,62 +773,62 @@ export function ZalivatorWorkspace() {
     void runGenerate()
   }, [generator, hasRestoredState, options, quantity, unique, runGenerate])
 
+  const settingsContent = (
+    <div className="space-y-4">
+      {generator === "uuidV7" ? (
+        <p className="text-sm leading-5 text-muted-foreground">
+          RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
+        </p>
+      ) : null}
+
+      {metadata.optionFields.length > 0 ? (
+        <FieldGroup className="gap-4">
+          {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
+        </FieldGroup>
+      ) : generator !== "uuidV7" ? (
+        <p className="text-sm leading-5 text-muted-foreground">
+          Дополнительных настроек нет. Набор обновляется сразу по базовому сценарию.
+        </p>
+      ) : null}
+    </div>
+  )
+
+  const resultPane = (
+    <ZalivatorResultList
+      result={result}
+      isPending={isPending}
+      error={error}
+      quantity={quantity}
+      onQuantityChange={handleQuantityChange}
+      unique={unique}
+      supportsUnique={metadata.supportsUnique}
+      onUniqueChange={(nextValue) => {
+        autoRunModeRef.current = "immediate"
+        setDraftsByGenerator((current) => {
+          const currentDraft = current[generator] ?? buildDefaultDraft(generator)
+
+          return {
+            ...current,
+            [generator]: {
+              ...currentDraft,
+              unique: nextValue,
+            },
+          }
+        })
+      }}
+    />
+  )
+
   return (
-    <main className="flex h-full min-h-0 w-full flex-col gap-0 lg:grid lg:grid-cols-[220px_360px_minmax(0,1fr)] lg:overflow-hidden">
-      <aside className="min-h-0 border-b lg:h-full lg:border-r lg:border-b-0">
-        <div className="min-h-0 lg:h-full lg:overflow-auto">
-          <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
-        </div>
+    <main className="flex h-full min-h-0 w-full flex-col gap-0 lg:grid lg:grid-cols-[220px_300px_minmax(0,1fr)] lg:overflow-hidden">
+      <aside className="min-h-0 overflow-auto border-b lg:h-full lg:border-r lg:border-b-0">
+        <ZalivatorGeneratorPicker value={generator} onChange={handleGeneratorChange} />
       </aside>
-
       <section className="min-h-0 border-b lg:h-full lg:border-r lg:border-b-0">
-        <div className="flex h-full min-h-0 flex-col">
-          <div className="min-h-0 flex-1 overflow-auto p-4">
-            <div className="space-y-4">
-              {generator === "uuidV7" ? (
-                <p className="text-sm leading-5 text-muted-foreground">
-                  RFC 9562 UUID v7 с Unix timestamp в миллисекундах, корректным variant и time-ordered batch-поведением.
-                </p>
-              ) : null}
-
-              {metadata.optionFields.length > 0 ? (
-                <FieldGroup className="gap-4">
-                  {renderOptionFields(metadata.optionFields, options, handleOptionChange)}
-                </FieldGroup>
-              ) : generator !== "uuidV7" ? (
-                <p className="text-sm leading-5 text-muted-foreground">
-                  Дополнительных настроек нет. Набор обновляется сразу по базовому сценарию.
-                </p>
-              ) : null}
-            </div>
-          </div>
-        </div>
+        <div className="h-full min-h-0 overflow-auto p-4">{settingsContent}</div>
       </section>
-
       <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:h-full">
-        <ZalivatorResultList
-          result={result}
-          isPending={isPending}
-          error={error}
-          quantity={quantity}
-          onQuantityChange={handleQuantityChange}
-          unique={unique}
-          supportsUnique={metadata.supportsUnique}
-          onUniqueChange={(nextValue) => {
-            autoRunModeRef.current = "immediate"
-            setDraftsByGenerator((current) => {
-              const currentDraft = current[generator] ?? buildDefaultDraft(generator)
-
-              return {
-                ...current,
-                [generator]: {
-                  ...currentDraft,
-                  unique: nextValue,
-                },
-              }
-            })
-          }}
-        />
+        {resultPane}
       </section>
     </main>
   )

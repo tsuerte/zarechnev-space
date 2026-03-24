@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 
 import { PortableTextRenderer } from "@/components/portable-text"
 import { formatPublishedDate } from "@/lib/date"
+import { getEditorialImageDisplayDimensions } from "@/lib/editorial-image"
 import { buildMetadata } from "@/lib/seo"
 import { sanityClient } from "@/lib/sanity/client"
 import { caseStudyBySlugAndSectionQuery, caseStudySlugsQuery } from "@/lib/sanity/queries"
@@ -70,8 +71,10 @@ export default async function CaseStudyPage({
   }
 
   const coverUrl = item.coverImage?.asset?.url
-  const coverWidth = item.coverImage?.asset?.metadata?.dimensions?.width ?? 1200
-  const coverHeight = item.coverImage?.asset?.metadata?.dimensions?.height ?? 675
+  const coverAssetWidth = item.coverImage?.asset?.metadata?.dimensions?.width ?? 1200
+  const coverAssetHeight = item.coverImage?.asset?.metadata?.dimensions?.height ?? 675
+  const { displayWidth: coverWidth, displayHeight: coverHeight } =
+    getEditorialImageDisplayDimensions(coverAssetWidth, coverAssetHeight)
 
   return (
     <main className="mx-auto w-full max-w-4xl">
@@ -93,7 +96,7 @@ export default async function CaseStudyPage({
         </header>
 
         {coverUrl && item.coverImage?.alt ? (
-          <figure className="space-y-2">
+          <figure className="mx-auto w-full space-y-2" style={{ maxWidth: `${coverWidth}px` }}>
             <Image
               src={coverUrl}
               alt={item.coverImage.alt}

@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui-kit"
+import { getEditorialImageDisplayDimensions } from "@/lib/editorial-image"
 import { cn } from "@/lib/utils"
 
 type ContentImageValue = {
@@ -132,11 +133,13 @@ const components: PortableTextComponents = {
 
       if (!imageUrl || !image.alt) return null
 
-      const width = image.asset?.metadata?.dimensions?.width ?? 1200
-      const height = image.asset?.metadata?.dimensions?.height ?? 675
+      const assetWidth = image.asset?.metadata?.dimensions?.width ?? 1200
+      const assetHeight = image.asset?.metadata?.dimensions?.height ?? 675
+      const { displayWidth: width, displayHeight: height } =
+        getEditorialImageDisplayDimensions(assetWidth, assetHeight)
 
       return (
-        <figure className="my-7 space-y-2.5">
+        <figure className="mx-auto my-7 w-full space-y-2.5" style={{ maxWidth: `${width}px` }}>
           <Image
             src={imageUrl}
             alt={image.alt}

@@ -6,7 +6,7 @@ import {
   Droplets,
   FileCode2,
   File,
-  FolderOpen,
+  Scroll,
   Shapes,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -48,14 +48,9 @@ type NavSection = {
 const data: { navMain: NavSection[] } = {
   navMain: [
     {
+      title: "Кейсы",
       url: "#",
-      items: [
-        {
-          title: "Кейсы",
-          url: "/cases",
-          icon: FolderOpen,
-        },
-      ],
+      items: [],
     },
     {
       title: "DesignOps",
@@ -140,7 +135,15 @@ export function AppSidebar({
     return data.navMain.map((section) => ({
       ...section,
       items:
-        section.title === "DesignOps"
+        section.title === "Кейсы"
+          ? sidebarCaseItems
+              .filter((caseItem) => caseItem.section === "cases")
+              .map((caseItem) => ({
+                title: caseItem.title,
+                url: `/cases/${caseItem.slug}`,
+                icon: Scroll,
+              })) satisfies NavItem[]
+          : section.title === "DesignOps"
           ? sidebarCaseItems
               .filter((caseItem) => caseItem.section === "designops")
               .sort((left, right) => {
@@ -158,22 +161,7 @@ export function AppSidebar({
                 url: `/designops/${caseItem.slug}`,
                 icon: File,
               })) satisfies NavItem[]
-          : section.items.map((item) => {
-        if (item.url !== "/cases") {
-          return item
-        }
-
-        return {
-          ...item,
-          children: sidebarCaseItems
-            .filter((caseItem) => caseItem.section === "cases")
-            .map((caseItem) => ({
-            icon: undefined,
-            title: caseItem.title,
-            url: `/cases/${caseItem.slug}`,
-          })),
-        }
-      }),
+          : section.items,
     }))
   }, [sidebarCaseItems])
 

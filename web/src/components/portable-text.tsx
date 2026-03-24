@@ -69,15 +69,15 @@ type CodeBlockValue = {
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
-      <p className="mt-4 text-base leading-7 text-foreground first:mt-0">{children}</p>
+      <p className="mt-4 text-lg leading-[26px] text-foreground first:mt-0">{children}</p>
     ),
     h2: ({ children }) => (
-      <h2 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2 className="mt-1 mb-3 scroll-m-20 text-2xl leading-7 font-semibold tracking-tight first:mt-0">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-7 scroll-m-20 text-xl font-semibold tracking-tight">{children}</h3>
+      <h3 className="mt-1 mb-3 scroll-m-20 text-xl leading-6 font-medium tracking-tight">{children}</h3>
     ),
     h4: ({ children }) => (
       <h4 className="mt-5 scroll-m-20 text-lg font-semibold tracking-tight">{children}</h4>
@@ -90,12 +90,12 @@ const components: PortableTextComponents = {
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="my-4 ml-6 list-disc space-y-1.5 text-base leading-7 marker:text-muted-foreground">
+      <ul className="my-4 ml-6 list-disc space-y-1.5 text-lg leading-[26px] marker:text-muted-foreground">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="my-4 ml-6 list-decimal space-y-1.5 text-base leading-7 marker:text-muted-foreground">
+      <ol className="my-4 ml-6 list-decimal space-y-1.5 text-lg leading-[26px] marker:text-muted-foreground">
         {children}
       </ol>
     ),
@@ -142,7 +142,7 @@ const components: PortableTextComponents = {
             alt={image.alt}
             width={width}
             height={height}
-            className="h-auto w-full rounded-xl border"
+            className="h-auto w-full rounded-xl"
             placeholder={image.asset?.metadata?.lqip ? "blur" : "empty"}
             blurDataURL={image.asset?.metadata?.lqip}
           />

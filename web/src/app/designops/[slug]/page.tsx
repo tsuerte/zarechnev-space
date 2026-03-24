@@ -74,7 +74,7 @@ export default async function DesignOpsArticlePage({
   const coverHeight = item.coverImage?.asset?.metadata?.dimensions?.height ?? 675
 
   return (
-    <main className="mx-auto w-full max-w-3xl">
+    <main className="mx-auto w-full max-w-4xl">
       <article className="space-y-7">
         <header className="space-y-3">
           <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
@@ -99,7 +99,7 @@ export default async function DesignOpsArticlePage({
               alt={item.coverImage.alt}
               width={coverWidth}
               height={coverHeight}
-              className="w-full rounded-xl border object-cover"
+              className="w-full rounded-xl object-cover"
               placeholder={item.coverImage.asset?.metadata?.lqip ? "blur" : "empty"}
               blurDataURL={item.coverImage.asset?.metadata?.lqip}
               priority

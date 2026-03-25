@@ -23,6 +23,20 @@ export default function LabPage() {
         <Card>
           <CardHeader>
             <CardTitle>
+              <Link href="/lab/avatars" className="hover:underline">
+                Аватары
+              </Link>
+            </CardTitle>
+            <CardDescription>Каталог и подборка аватаров из Sanity.</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            Просмотр, фильтрация и ZIP-скачивание наборов аватаров.
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
               <Link href="/lab/icons" className="hover:underline">
                 Icons
               </Link>

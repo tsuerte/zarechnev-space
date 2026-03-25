@@ -56,7 +56,14 @@ export const metadata: Metadata = {
 }
 
 const getSidebarCaseItems = unstable_cache(
-  async () => sanityClient.fetch<SidebarCaseItem[]>(sidebarCaseItemsQuery),
+  async () => {
+    try {
+      return await sanityClient.fetch<SidebarCaseItem[]>(sidebarCaseItemsQuery)
+    } catch (error) {
+      console.error("Failed to fetch sidebar case items", error)
+      return []
+    }
+  },
   ['sidebar-case-items'],
   { revalidate: 300 }
 )

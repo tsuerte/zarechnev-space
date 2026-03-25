@@ -81,6 +81,22 @@ export const caseStudyBySlugAndSectionQuery = groq`*[
         }
       }
     },
+    _type == "contentCarousel" => {
+      ...,
+      items[]{
+        ...,
+        image{
+          ...,
+          asset->{
+            url,
+            metadata {
+              lqip,
+              dimensions {width, height}
+            }
+          }
+        }
+      }
+    },
     _type == "simpleTable" => {
       ...,
       rows[]{

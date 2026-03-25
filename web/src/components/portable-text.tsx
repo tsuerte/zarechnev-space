@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui-kit"
+import { ContentCarousel } from "@/components/content-carousel"
 import { getEditorialImageDisplayDimensions } from "@/lib/editorial-image"
 import { cn } from "@/lib/utils"
 
@@ -65,6 +66,18 @@ type CodeBlockValue = {
   filename?: string
   language?: string
   code?: string
+}
+
+type ContentCarouselItemValue = {
+  _key?: string
+  image?: ContentImageValue
+}
+
+type ContentCarouselValue = {
+  _type: "contentCarousel"
+  title?: string
+  description?: string
+  items?: ContentCarouselItemValue[]
 }
 
 const components: PortableTextComponents = {
@@ -156,6 +169,9 @@ const components: PortableTextComponents = {
           ) : null}
         </figure>
       )
+    },
+    contentCarousel: ({ value }) => {
+      return <ContentCarousel value={value as ContentCarouselValue} />
     },
     divider: ({ value }) => {
       const divider = value as DividerValue

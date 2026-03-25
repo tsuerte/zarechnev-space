@@ -177,7 +177,7 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-normal">zarechnev.space</span>
-                  <span className="truncate text-xs">Сайт-портфолио</span>
+                  <span className="truncate text-xs">Моё место</span>
                 </div>
               </Link>
             </SidebarMenuButton>

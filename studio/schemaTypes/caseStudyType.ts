@@ -96,6 +96,7 @@ export const caseStudyType = defineType({
             ],
           },
         }),
+        defineArrayMember({type: 'contentCarousel'}),
         defineArrayMember({type: 'contentImage'}),
         defineArrayMember({type: 'callout'}),
         defineArrayMember({type: 'codeBlock'}),

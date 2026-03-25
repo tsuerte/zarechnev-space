@@ -89,7 +89,7 @@ export default async function CaseStudyPage({
           </p>
 
           {item.excerpt ? (
-            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+            <p className="text-base leading-7 text-muted-foreground">
               {item.excerpt}
             </p>
           ) : null}

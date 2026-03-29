@@ -47,17 +47,18 @@ Primary files:
   - `web/data/icons/index.json`
   - `web/data/icons/source/*.svg`
   - `web/data/icons/optimized/*.svg`
-- The public UI must expose canonical optimized SVG only.
-- Source SVG is internal-only and must not leak into the public web contract.
+- The public UI defaults to canonical optimized SVG.
+- Source SVG may be exposed only from the selected-icon detail surface as explicit raw copy/download/code-view actions.
 - The page has preview-only controls for:
   - `size`
   - `strokeWidth`
   - `color`
 - These controls change preview rendering only. They must not alter:
   - canonical stored SVG
+  - raw source SVG
   - copy payloads
   - download payloads
-- The detail panel may link back to the Figma source node, but it must not expose raw source SVG bytes.
+- The detail panel may link back to the Figma source node and may expose raw source SVG bytes only for explicit raw actions.
 - Manual upload is gone. Do not reintroduce it unless explicitly requested.
 
 ## Architecture And Data Flow
@@ -77,15 +78,18 @@ Primary files:
 9. `icons-grid.tsx` + `icon-card.tsx` render the catalog:
    - fixed `140x140` cards
    - inline SVG preview in the grid
-10. `icon-detail-panel.tsx` is the public detail UI and canonical download/copy surface.
+10. `icon-detail-panel.tsx` is the public detail UI for:
+   - canonical preview
+   - canonical copy/download
+   - raw source copy/download/code view
 
 ## Guardrails
 
 - Treat `/lab/icons` as a catalog of canonical outputs, not an editor or uploader.
-- Do not leak `svgSource` into browser payloads, client props, server actions, or public DTOs.
+- Keep `svgSource` constrained to selected-icon detail payloads and explicit raw actions. Do not leak it into grid summaries, preview flows, or page-level list DTOs.
 - Keep the canonical/source separation intact:
-  - source SVG stays on disk for sync internals
-  - optimized SVG is the only public copy/download target
+  - source SVG stays on disk for sync internals and detail-only raw actions
+  - optimized SVG remains the default public preview/copy/download target
 - Treat `size`, `strokeWidth`, and `color` as preview state only.
 - Do not silently expand preview controls into "export customized icon" behavior unless explicitly requested.
 - App code must import UI only from `@/ui-kit`.
@@ -110,12 +114,13 @@ Primary files:
   - fixed `140x140`
   - icon above label
   - preview size changes must not resize the card itself
+- Raw source access belongs only in the selected-icon detail surface, not in the grid or toolbar.
 
 ### Storage or DTO changes
 
 - Public storage reads belong in `web/src/lib/icons/storage.ts`.
 - Shared icon types and helpers belong in `web/src/lib/icons/types.ts`.
-- If the web needs a new field, make sure it does not violate the source/canonical boundary.
+- If the web needs a new field, keep raw source fields limited to detail-only DTOs unless the user explicitly asks to widen that boundary.
 
 ### Sync changes
 
@@ -129,6 +134,7 @@ Primary files:
 - Keep public filename logic centralized in `web/src/lib/icons/types.ts`.
 - Do not rebuild filename sanitation ad hoc inside UI components.
 - Preview customizations must not leak into copy/download unless the user explicitly asks for customized exports.
+- If raw download/copy is exposed, keep it tied to the stored Figma source SVG, not a client-reconstructed approximation.
 
 ## Known Pitfalls
 
@@ -150,7 +156,7 @@ Primary files:
 ## Stop And Ask
 
 Stop and ask before proceeding if the request would:
-- expose raw source SVG in the public UI or client payloads;
+- move raw source SVG beyond the selected-icon detail surface or make it the default catalog payload;
 - turn `/lab/icons` into a generic upload/optimizer tool;
 - change the canonical/source download rule;
 - materially change Figma sync semantics, orphan handling, or local storage layout;

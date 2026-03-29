@@ -48,6 +48,7 @@ export type IconVariantDetail = Omit<
   "sourceFileName" | "optimizedFileName" | "optimizedHash"
 > & {
   svgOptimized: string
+  svgSource: string
 }
 
 export type IconFamilySummary = Omit<IconFamilyRecord, "variants" | "lastSyncError"> & {
@@ -68,7 +69,11 @@ export function createFigmaNodeUrl(fileKey: string, nodeId: string) {
   return `https://www.figma.com/design/${fileKey}/source?node-id=${encodeURIComponent(nodeId.replace(/:/g, "-"))}`
 }
 
-function sanitizePublicFileNameSegment(value: string) {
+function sanitizePublicFileNameSegment(value: string | undefined) {
+  if (!value) {
+    return ""
+  }
+
   const normalized = value
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -80,13 +85,25 @@ function sanitizePublicFileNameSegment(value: string) {
   return normalized || "icon"
 }
 
-export function createPublicIconFileName(displayName: string, variantLabel: string) {
-  const fileName = [displayName, variantLabel]
+function buildPublicIconFileName(
+  displayName: string,
+  variantLabel: string,
+  formatSuffix?: string
+) {
+  const fileName = [displayName, variantLabel, formatSuffix]
     .map(sanitizePublicFileNameSegment)
     .filter(Boolean)
     .join("-")
 
   return `${fileName || "icon"}.svg`
+}
+
+export function createPublicIconFileName(displayName: string, variantLabel: string) {
+  return buildPublicIconFileName(displayName, variantLabel)
+}
+
+export function createPublicRawIconFileName(displayName: string, variantLabel: string) {
+  return buildPublicIconFileName(displayName, variantLabel, "raw")
 }
 
 export function splitIconFullName(fullName: string) {

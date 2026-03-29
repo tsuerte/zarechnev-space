@@ -52,8 +52,8 @@ export function IconsToolbar({
 
   return (
     <div className="flex flex-col gap-3 border-b pb-4">
-      <div className="flex items-center gap-4">
-        <div className="relative w-[200px] shrink-0">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative min-w-0 basis-full sm:basis-[220px] sm:flex-none">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -63,10 +63,8 @@ export function IconsToolbar({
           />
         </div>
 
-        <div className="inline-flex shrink-0 items-center gap-2">
-          <span className="text-sm leading-5 text-muted-foreground">
-            Размер
-          </span>
+        <div className="flex min-w-[220px] flex-1 items-center gap-2 sm:min-w-[240px] lg:flex-none lg:basis-[280px]">
+          <span className="shrink-0 text-sm leading-5 text-muted-foreground">Размер</span>
           <Slider
             id="icons-preview-size"
             min={ICON_DETAIL_PREVIEW_SIZE_MIN}
@@ -78,18 +76,14 @@ export function IconsToolbar({
                 onPreviewSizeChange(value)
               }
             }}
-            className="w-[200px]"
+            className="min-w-0 flex-1"
             aria-label="Размер превью иконок"
           />
-          <span className="w-[18px] text-right text-sm leading-5 text-foreground">
-            {previewSize}
-          </span>
+          <span className="w-[18px] shrink-0 text-right text-sm leading-5 text-foreground">{previewSize}</span>
         </div>
 
-        <div className="inline-flex shrink-0 items-center gap-2">
-          <span className="text-sm leading-5 text-muted-foreground">
-            Толщина
-          </span>
+        <div className="flex min-w-[220px] flex-1 items-center gap-2 sm:min-w-[240px] lg:flex-none lg:basis-[280px]">
+          <span className="shrink-0 text-sm leading-5 text-muted-foreground">Толщина</span>
           <Slider
             id="icons-preview-stroke"
             min={ICON_DETAIL_PREVIEW_STROKE_MIN}
@@ -101,10 +95,10 @@ export function IconsToolbar({
                 onPreviewStrokeWidthChange(value)
               }
             }}
-            className="w-[200px]"
+            className="min-w-0 flex-1"
             aria-label="Толщина stroke превью иконок"
           />
-          <span className="w-[22px] text-right text-sm leading-5 text-foreground">
+          <span className="w-[22px] shrink-0 text-right text-sm leading-5 text-foreground">
             {previewStrokeWidth}
           </span>
         </div>
@@ -128,9 +122,9 @@ export function IconsToolbar({
           <span>{currentPreviewColor}</span>
         </label>
 
-        <p className="ml-auto shrink-0 text-xs text-muted-foreground">
+        <p className="basis-full text-xs text-muted-foreground lg:ml-auto lg:basis-auto lg:text-right">
           {syncedAt
-            ? `Последний sync: ${new Date(syncedAt).toLocaleString("ru-RU")}`
+            ? `Последний синк: ${new Date(syncedAt).toLocaleString("ru-RU")}`
             : "Каталог ещё не синхронизирован."}
         </p>
       </div>

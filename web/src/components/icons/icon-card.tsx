@@ -34,6 +34,7 @@ export function IconCard({
     <button
       type="button"
       onClick={() => onSelect(icon.id)}
+      aria-pressed={isSelected}
       className={cn(
         "inline-flex size-[140px] min-w-0 flex-col items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-2.5 py-2.5 text-center outline-none hover:bg-surface-soft focus-visible:ring-[3px] focus-visible:ring-ring/50",
         isSelected && "bg-surface-soft"

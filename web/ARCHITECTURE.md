@@ -29,8 +29,8 @@ For non-trivial tasks:
 
 ## Repository rules
 - /lab/icons shows only canonical icons.
-- source SVG is internal-only and must not leak into public UI.
-- canonical SVG is the only public copy/download target.
+- canonical SVG is the default public preview/copy/download target.
+- raw source SVG for /lab/icons may be exposed only inside the selected-icon detail surface as an explicit secondary copy/download/code-view action.
 - preserve current architecture boundaries unless explicitly asked to refactor them.
 
 ## When to stop and ask

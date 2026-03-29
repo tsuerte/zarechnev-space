@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react"
 
 import { IconDetailPanel } from "@/components/icons/icon-detail-panel"
 import { IconsGrid } from "@/components/icons/icons-grid"
@@ -11,24 +11,20 @@ import type { IconFamilyDetail, IconFamilySummary } from "@/lib/icons/types"
 type IconsWorkspaceProps = {
   initialIcons: IconFamilySummary[]
   initialCatalogSyncedAt: string | null
-  initialSelectedIcon: IconFamilyDetail | null
 }
 
 export function IconsWorkspace({
   initialIcons,
   initialCatalogSyncedAt,
-  initialSelectedIcon,
 }: IconsWorkspaceProps) {
   const [previewSize, setPreviewSize] = useState(24)
   const [previewStrokeWidth, setPreviewStrokeWidth] = useState(1.5)
   const [previewColor, setPreviewColor] = useState(DEFAULT_ICON_PREVIEW_COLOR)
   const deferredPreviewColor = useDeferredValue(previewColor)
   const [query, setQuery] = useState("")
-  const [selectedIconId, setSelectedIconId] = useState<string | null>(
-    initialSelectedIcon?.id ?? initialIcons[0]?.id ?? null
-  )
-  const [selectedIcon, setSelectedIcon] = useState<IconFamilyDetail | null>(initialSelectedIcon)
-  const [isDetailLoading, setIsDetailLoading] = useState(false)
+  const [selectedIconId, setSelectedIconId] = useState<string | null>(initialIcons[0]?.id ?? null)
+  const [selectedIcon, setSelectedIcon] = useState<IconFamilyDetail | null>(null)
+  const [isDetailLoading, setIsDetailLoading] = useState(Boolean(initialIcons[0]))
   const [detailError, setDetailError] = useState<string | null>(null)
 
   async function loadIconDetail(iconId: string, signal: AbortSignal) {
@@ -72,13 +68,12 @@ export function IconsWorkspace({
     }
 
     if (!selectedIconId || !filteredIcons.some((icon) => icon.id === selectedIconId)) {
-      setSelectedIconId(filteredIcons[0]?.id ?? null)
+      setSelectedIconId(filteredIcons[0].id)
     }
   }, [filteredIcons, selectedIconId])
 
   useEffect(() => {
     if (!selectedIconId) {
-      setSelectedIcon(null)
       setDetailError(null)
       setIsDetailLoading(false)
       return
@@ -95,6 +90,7 @@ export function IconsWorkspace({
     async function syncSelectedIcon() {
       setIsDetailLoading(true)
       setDetailError(null)
+      setSelectedIcon(null)
 
       try {
         const icon = await loadIconDetail(iconId, abortController.signal)
@@ -122,59 +118,74 @@ export function IconsWorkspace({
     }
   }, [selectedIcon, selectedIconId])
 
+  const visibleSelectedIcon =
+    selectedIconId && selectedIcon?.id === selectedIconId ? selectedIcon : null
+
+  const handleSelectIcon = useCallback((iconId: string) => {
+    setSelectedIconId(iconId)
+  }, [])
+
   return (
-    <main className="flex h-full min-h-0 w-full">
-      <section className="flex min-w-0 flex-1 flex-col space-y-6 px-6 pb-6">
-        <div className="space-y-2 pt-6">
-          <h1 className="text-3xl font-semibold tracking-tight">Иконки</h1>
-          <p className="text-base text-muted-foreground">
-            Публичная витрина канонических SVG-иконок, синхронизированных из Figma page.
-          </p>
-        </div>
+    <main className="flex h-full min-h-0 w-full flex-col">
+      <section className="grid min-h-0 flex-1 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="flex min-h-0 min-w-0 flex-col px-6 pb-6">
+          <div className="space-y-2 py-6">
+            <h1 className="text-3xl font-semibold tracking-tight">Иконки</h1>
+            <p className="text-base text-muted-foreground">
+              Публичная витрина канонических SVG-иконок, синхронизированных из Figma page.
+            </p>
+          </div>
 
-        <IconsToolbar
-          query={query}
-          onQueryChange={setQuery}
-          previewSize={previewSize}
-          onPreviewSizeChange={setPreviewSize}
-          previewStrokeWidth={previewStrokeWidth}
-          onPreviewStrokeWidthChange={setPreviewStrokeWidth}
-          previewColor={previewColor}
-          onPreviewColorChange={setPreviewColor}
-          syncedAt={initialCatalogSyncedAt}
-        />
+          <IconsToolbar
+            query={query}
+            onQueryChange={setQuery}
+            previewSize={previewSize}
+            onPreviewSizeChange={setPreviewSize}
+            previewStrokeWidth={previewStrokeWidth}
+            onPreviewStrokeWidthChange={setPreviewStrokeWidth}
+            previewColor={previewColor}
+            onPreviewColorChange={setPreviewColor}
+            syncedAt={initialCatalogSyncedAt}
+          />
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {filteredIcons.length > 0 ? (
-            <IconsGrid
-              icons={filteredIcons}
-              selectedIconId={selectedIconId}
-              onSelect={setSelectedIconId}
-              previewSize={previewSize}
-              previewStrokeWidth={previewStrokeWidth}
-              previewColor={deferredPreviewColor}
-            />
-          ) : (
-            <div className="flex h-full min-h-[320px] items-center justify-center rounded-xl border border-dashed">
-              <div className="text-center">
-                <p className="text-sm text-foreground">Иконки не найдены</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Попробуй другой запрос или очисти поиск.
-                </p>
+          <div className="min-h-0 flex-1 overflow-y-auto pt-6">
+            {filteredIcons.length > 0 ? (
+              <IconsGrid
+                icons={filteredIcons}
+                selectedIconId={selectedIconId}
+                onSelect={handleSelectIcon}
+                previewSize={previewSize}
+                previewStrokeWidth={previewStrokeWidth}
+                previewColor={deferredPreviewColor}
+              />
+            ) : (
+              <div className="flex h-full min-h-[320px] items-center justify-center rounded-xl border border-dashed">
+                <div className="text-center">
+                  <p className="text-sm text-foreground">Иконки не найдены</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Попробуй другой запрос или очисти поиск.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </section>
 
-      <IconDetailPanel
-        icon={selectedIcon}
-        isLoading={isDetailLoading}
-        error={detailError}
-        previewSize={previewSize}
-        previewStrokeWidth={previewStrokeWidth}
-        previewColor={deferredPreviewColor}
-      />
+        <aside className="min-h-0 min-w-0 border-t border-t-border/20 bg-background xl:h-full xl:border-t-0 xl:border-l xl:border-l-border/15">
+          <div className="px-6 py-4 xl:h-full xl:px-0 xl:py-0">
+            <div className="mx-auto w-full max-w-sm xl:h-full xl:max-w-none">
+              <IconDetailPanel
+                icon={visibleSelectedIcon}
+                isLoading={isDetailLoading}
+                error={detailError}
+                previewSize={previewSize}
+                previewStrokeWidth={previewStrokeWidth}
+                previewColor={deferredPreviewColor}
+              />
+            </div>
+          </div>
+        </aside>
+      </section>
     </main>
   )
 }

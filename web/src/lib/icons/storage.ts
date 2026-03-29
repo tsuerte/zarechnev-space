@@ -165,6 +165,10 @@ async function readOptimizedVariantFile(optimizedFileName: string) {
   return readFile(resolveOptimizedPath(optimizedFileName), "utf8")
 }
 
+async function readSourceVariantFile(sourceFileName: string) {
+  return readFile(resolveSourcePath(sourceFileName), "utf8")
+}
+
 export async function writeIconVariantFiles({
   sourceFileName,
   optimizedFileName,
@@ -264,7 +268,10 @@ export async function getPublicIconFamily(id: string): Promise<IconFamilyDetail 
 
   const variants = await Promise.all(
     sortVariants(family.variants).map(async (variant): Promise<IconVariantDetail> => {
-      const svgOptimized = await readOptimizedVariantFile(variant.optimizedFileName)
+      const [svgOptimized, svgSource] = await Promise.all([
+        readOptimizedVariantFile(variant.optimizedFileName),
+        readSourceVariantFile(variant.sourceFileName),
+      ])
 
       return {
         id: variant.id,
@@ -273,6 +280,7 @@ export async function getPublicIconFamily(id: string): Promise<IconFamilyDetail 
         label: variant.label,
         props: variant.props,
         svgOptimized,
+        svgSource,
       }
     })
   )

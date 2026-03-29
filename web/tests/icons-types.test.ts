@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 
 import {
   createPublicIconFileName,
+  createPublicRawIconFileName,
   createVariantKey,
   createVariantLabel,
   parseVariantPropsFromName,
@@ -60,6 +61,11 @@ test("createPublicIconFileName sanitizes public download names", () => {
   assert.equal(
     createPublicIconFileName("///", "***"),
     "icon-icon.svg"
+  )
+
+  assert.equal(
+    createPublicRawIconFileName("Queue / Params", "Default"),
+    "Queue-Params-Default-raw.svg"
   )
 })
 

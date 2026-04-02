@@ -10,9 +10,20 @@ import {
 import { generateKpp } from "../src/lib/zalivator/generators/text/kpp"
 import { generateMeasurement } from "../src/lib/zalivator/generators/text/measurement"
 import { generateMobilePhone } from "../src/lib/zalivator/generators/text/mobile-phone"
-import { generateName } from "../src/lib/zalivator/generators/text/name"
+import {
+  FEMALE_FIRST_NAMES,
+  FEMALE_LAST_NAMES,
+  FEMALE_PATRONYMICS,
+  generateName,
+  MALE_FIRST_NAMES,
+  MALE_LAST_NAMES,
+  MALE_PATRONYMICS,
+} from "../src/lib/zalivator/generators/text/name"
 import { generateOrganizationName } from "../src/lib/zalivator/generators/text/organization-name"
-import { normalizeMeasurementOptions } from "../src/lib/zalivator/options"
+import {
+  normalizeMeasurementOptions,
+  normalizeMobilePhoneOptions,
+} from "../src/lib/zalivator/options"
 import {
   POSITION_BY_DOMAIN,
   generatePosition,
@@ -30,6 +41,32 @@ function decodeUuidV7Timestamp(value: string) {
 function decodeUuidV7Counter(value: string) {
   return Number.parseInt(value.replace(/-/g, "").slice(12, 16), 16) & 0x0fff
 }
+
+const surnamePattern = "[А-ЯЁ][а-яё]+"
+const simpleNamePattern = "[А-ЯЁ][а-яё]+"
+const patronymicPattern = "[А-ЯЁ][а-яё]+"
+const curatedLongSurnamePairs = [
+  ["Воскресенский", "Воскресенская"],
+  ["Белозерский", "Белозерская"],
+  ["Преображенский", "Преображенская"],
+  ["Рождественский", "Рождественская"],
+  ["Добровольский", "Добровольская"],
+  ["Боголюбский", "Боголюбская"],
+  ["Краснопольский", "Краснопольская"],
+  ["Тихомиров", "Тихомирова"],
+  ["Богоявленский", "Богоявленская"],
+  ["Пятигорский", "Пятигорская"],
+  ["Миролюбов", "Миролюбова"],
+  ["Серебряков", "Серебрякова"],
+  ["Черноморский", "Черноморская"],
+  ["Знаменский", "Знаменская"],
+  ["Владимирский", "Владимирская"],
+  ["Вишневский", "Вишневская"],
+  ["Покровский", "Покровская"],
+  ["Малиновский", "Малиновская"],
+  ["Беляевский", "Беляевская"],
+  ["Светличный", "Светличная"],
+] as const
 
 test("name generator supports configured text formats", () => {
   const nbsp = "\u00A0"
@@ -49,18 +86,21 @@ test("name generator supports configured text formats", () => {
   const lastInitials = generateName({ format: "last-initials", gender: "male" })
   const initialsLast = generateName({ format: "initials-last", gender: "male" })
 
-  assert.match(full, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
-  assert.match(lastNameOnly, /^[А-ЯЁ][а-яё]+$/)
-  assert.match(firstNameOnly, /^[А-ЯЁ][а-яё]+$/)
-  assert.match(patronymicOnly, /^[А-ЯЁ][а-яё]+$/)
-  assert.match(firstPatronymicLast, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
-  assert.match(firstLast, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
-  assert.match(lastFirst, /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/)
-  assert.match(firstLastInitial, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.$/)
-  assert.match(lastFirstInitial, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.$/)
-  assert.match(firstInitialLast, /^[А-Я]\.\u00A0[А-ЯЁ][а-яё]+$/)
-  assert.match(lastInitials, /^[А-ЯЁ][а-яё]+\u00A0[А-Я]\.\u00A0[А-Я]\.$/)
-  assert.match(initialsLast, /^[А-Я]\.\u00A0[А-Я]\.\u00A0[А-ЯЁ][а-яё]+$/)
+  assert.match(full, new RegExp(`^${surnamePattern} ${simpleNamePattern} ${patronymicPattern}$`))
+  assert.match(lastNameOnly, new RegExp(`^${surnamePattern}$`))
+  assert.match(firstNameOnly, new RegExp(`^${simpleNamePattern}$`))
+  assert.match(patronymicOnly, new RegExp(`^${patronymicPattern}$`))
+  assert.match(
+    firstPatronymicLast,
+    new RegExp(`^${simpleNamePattern} ${patronymicPattern} ${surnamePattern}$`)
+  )
+  assert.match(firstLast, new RegExp(`^${simpleNamePattern} ${surnamePattern}$`))
+  assert.match(lastFirst, new RegExp(`^${surnamePattern} ${simpleNamePattern}$`))
+  assert.match(firstLastInitial, new RegExp(`^${simpleNamePattern}\u00A0[А-Я]\\.$`))
+  assert.match(lastFirstInitial, new RegExp(`^${surnamePattern}\u00A0[А-Я]\\.$`))
+  assert.match(firstInitialLast, new RegExp(`^[А-Я]\\.\u00A0${surnamePattern}$`))
+  assert.match(lastInitials, new RegExp(`^${surnamePattern}\u00A0[А-Я]\\.\u00A0[А-Я]\\.$`))
+  assert.match(initialsLast, new RegExp(`^[А-Я]\\.\u00A0[А-Я]\\.\u00A0${surnamePattern}$`))
   assert.ok(firstLastInitial.includes(nbsp))
   assert.ok(lastFirstInitial.includes(nbsp))
   assert.ok(firstInitialLast.includes(nbsp))
@@ -72,16 +112,33 @@ test("name generator respects gender option", () => {
   const female = generateName({ format: "last-first-patronymic", gender: "female" })
   const male = generateName({ format: "last-first-patronymic", gender: "male" })
 
-  assert.match(female, /(Иванова|Петрова|Соколова|Козлова|Смирнова|Новикова|Романова|Васильева)/)
-  assert.match(male, /(Иванов|Петров|Соколов|Козлов|Смирнов|Новиков|Романов|Васильев)/)
+  assert.ok(FEMALE_LAST_NAMES.some((lastName) => female.startsWith(`${lastName} `)))
+  assert.ok(MALE_LAST_NAMES.some((lastName) => male.startsWith(`${lastName} `)))
 })
 
 test("mobile phone generator supports multiple output formats", () => {
-  const pretty = generateMobilePhone({ format: "pretty" })
   const plain = generateMobilePhone({ format: "plain" })
+  const spacedHyphen = generateMobilePhone({ format: "spaced-hyphen" })
+  const parenHyphen = generateMobilePhone({ format: "paren-hyphen" })
+  const spaced = generateMobilePhone({ format: "spaced" })
 
-  assert.match(pretty, /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/)
   assert.match(plain, /^\+7\d{10}$/)
+  assert.match(spacedHyphen, /^\+7 \d{3} \d{3}-\d{2}-\d{2}$/)
+  assert.match(parenHyphen, /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/)
+  assert.match(spaced, /^\+7 \d{3} \d{3} \d{2} \d{2}$/)
+})
+
+test("mobile phone options normalize defaults and legacy values", () => {
+  assert.deepEqual(normalizeMobilePhoneOptions(), { format: "paren-hyphen" })
+  assert.deepEqual(normalizeMobilePhoneOptions({ format: "pretty" }), {
+    format: "paren-hyphen",
+  })
+  assert.deepEqual(normalizeMobilePhoneOptions({ format: "plain" }), { format: "plain" })
+  assert.deepEqual(normalizeMobilePhoneOptions({ format: "spaced-hyphen" }), {
+    format: "spaced-hyphen",
+  })
+  assert.deepEqual(normalizeMobilePhoneOptions({ format: "spaced" }), { format: "spaced" })
+  assert.throws(() => normalizeMobilePhoneOptions({ format: "invalid" }), /format/)
 })
 
 test("email generator respects custom domains with varied local-parts", () => {
@@ -110,20 +167,47 @@ test("city generator returns a Russian city name from the built-in list", () => 
 
 test("organization name generator returns a legal form, entrepreneur, or plain organization name", () => {
   const values = Array.from({ length: 50 }, () => generateOrganizationName())
+  const entrepreneurPattern = new RegExp(
+    `^ИП ${surnamePattern} ${simpleNamePattern} ${patronymicPattern}$`
+  )
 
   assert.ok(
     values.every((value) => {
       return (
         /^(ООО|АО|ПАО) «.+»$/.test(value) ||
-        /^ИП [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(value) ||
+        entrepreneurPattern.test(value) ||
         /^[А-ЯЁ][А-Яа-яё]+$/.test(value)
       )
     })
   )
 
   assert.ok(values.some((value) => /^(ООО|АО|ПАО) «.+»$/.test(value)))
-  assert.ok(values.some((value) => /^ИП [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(value)))
+  assert.ok(values.some((value) => entrepreneurPattern.test(value)))
   assert.ok(values.some((value) => /^[А-ЯЁ][А-Яа-яё]+$/.test(value)))
+})
+
+test("name dictionaries contain exact target counts", () => {
+  assert.equal(FEMALE_FIRST_NAMES.length, 70)
+  assert.equal(MALE_FIRST_NAMES.length, 70)
+  assert.equal(FEMALE_LAST_NAMES.length, 90)
+  assert.equal(MALE_LAST_NAMES.length, 90)
+  assert.equal(FEMALE_PATRONYMICS.length, 70)
+  assert.equal(MALE_PATRONYMICS.length, 70)
+})
+
+test("surname dictionaries keep a balanced pool of long surnames", () => {
+  const femaleLong = FEMALE_LAST_NAMES.filter((surname) => surname.length >= 9)
+  const maleLong = MALE_LAST_NAMES.filter((surname) => surname.length >= 9)
+
+  assert.ok(femaleLong.length >= 20)
+  assert.ok(maleLong.length >= 20)
+})
+
+test("curated long surname pairs are present in both gendered dictionaries", () => {
+  for (const [maleSurname, femaleSurname] of curatedLongSurnamePairs) {
+    assert.ok(MALE_LAST_NAMES.includes(maleSurname))
+    assert.ok(FEMALE_LAST_NAMES.includes(femaleSurname))
+  }
 })
 
 test("inn generator returns correct legal and physical values", () => {

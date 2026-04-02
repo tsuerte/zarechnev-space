@@ -104,8 +104,10 @@ export const ZALIVATOR_GENERATOR_METADATA: Record<
         label: "Формат",
         control: "segmented",
         options: [
-          { value: "pretty", label: "Со скобками" },
-          { value: "plain", label: "Сплошной" },
+          { value: "plain", label: "+7XXXXXXXXXX" },
+          { value: "spaced-hyphen", label: "+7 XXX XXX-XX-XX" },
+          { value: "paren-hyphen", label: "+7 (XXX) XXX-XX-XX" },
+          { value: "spaced", label: "+7 XXX XXX XX XX" },
         ],
       },
     ],

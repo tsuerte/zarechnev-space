@@ -27,7 +27,12 @@ export const ZALIVATOR_NAME_GENDERS = ["any", "male", "female"] as const
 
 export type ZalivatorNameGender = (typeof ZALIVATOR_NAME_GENDERS)[number]
 
-export const ZALIVATOR_MOBILE_PHONE_FORMATS = ["pretty", "plain"] as const
+export const ZALIVATOR_MOBILE_PHONE_FORMATS = [
+  "plain",
+  "spaced-hyphen",
+  "paren-hyphen",
+  "spaced",
+] as const
 
 export type ZalivatorMobilePhoneFormat = (typeof ZALIVATOR_MOBILE_PHONE_FORMATS)[number]
 
@@ -178,13 +183,20 @@ export function normalizeMobilePhoneOptions(
   const format = raw.format
 
   if (format === undefined) {
-    return { format: "pretty" }
+    return { format: "paren-hyphen" }
   }
 
-  if (
-    typeof format !== "string" ||
-    !ZALIVATOR_MOBILE_PHONE_FORMATS.includes(format as ZalivatorMobilePhoneFormat)
-  ) {
+  if (typeof format !== "string") {
+    throw new Error(
+      'Опция "format" для generator "mobilePhone" имеет недопустимое значение.'
+    )
+  }
+
+  if (format === "pretty") {
+    return { format: "paren-hyphen" }
+  }
+
+  if (!ZALIVATOR_MOBILE_PHONE_FORMATS.includes(format as ZalivatorMobilePhoneFormat)) {
     throw new Error(
       'Опция "format" для generator "mobilePhone" имеет недопустимое значение.'
     )

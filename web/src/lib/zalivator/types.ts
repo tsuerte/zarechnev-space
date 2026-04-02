@@ -50,6 +50,13 @@ export type ZalivatorSegmentedOptionField = {
   options: ZalivatorOptionChoice[]
 } & ZalivatorBaseOptionField
 
+export type ZalivatorRadioOptionField = {
+  key: string
+  label: string
+  control: "radio"
+  options: ZalivatorOptionChoice[]
+} & ZalivatorBaseOptionField
+
 export type ZalivatorTextOptionField = {
   key: string
   label: string
@@ -98,6 +105,7 @@ export type ZalivatorTextareaOptionField = {
 
 export type ZalivatorOptionField =
   | ZalivatorSegmentedOptionField
+  | ZalivatorRadioOptionField
   | ZalivatorTextOptionField
   | ZalivatorNumberOptionField
   | ZalivatorSelectOptionField

@@ -9,6 +9,8 @@ import {
   FieldGroup,
   FieldLabel,
   Input,
+  RadioGroup,
+  RadioGroupItem,
   Select,
   SelectContent,
   SelectItem,
@@ -134,12 +136,17 @@ function restoreOptions(
   for (const field of metadata.optionFields) {
     const nextValue = persistedOptions[field.key]
 
-    if (field.control === "segmented" || field.control === "select") {
+    if (field.control === "segmented" || field.control === "select" || field.control === "radio") {
+      const normalizedValue =
+        generator === "mobilePhone" && field.key === "format" && nextValue === "pretty"
+          ? "paren-hyphen"
+          : nextValue
+
       if (
-        typeof nextValue === "string" &&
-        field.options.some((option) => option.value === nextValue)
+        typeof normalizedValue === "string" &&
+        field.options.some((option) => option.value === normalizedValue)
       ) {
-        restoredOptions[field.key] = nextValue
+        restoredOptions[field.key] = normalizedValue
       }
       continue
     }
@@ -232,7 +239,7 @@ function buildDefaultOptions(generator: ZalivatorGeneratorId) {
   const defaults: Record<string, ZalivatorOptionValue> = {}
 
   for (const field of metadata.optionFields) {
-    if (field.control === "segmented") {
+    if (field.control === "segmented" || field.control === "radio") {
       defaults[field.key] = field.options[0]?.value ?? ""
       continue
     }
@@ -266,7 +273,7 @@ function renderOptionField(
   }
 
   if (field.control === "segmented") {
-    if (field.options.length > 4) {
+    if (field.options.length >= 4) {
       return (
         <Field key={field.key}>
           <FieldLabel>{field.label}</FieldLabel>
@@ -303,6 +310,34 @@ function renderOptionField(
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
+        </FieldContent>
+      </Field>
+    )
+  }
+
+  if (field.control === "radio") {
+    return (
+      <Field key={field.key}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <FieldContent>
+          <RadioGroup
+            value={typeof value === "string" ? value : undefined}
+            onValueChange={(nextValue) => onChange(field.key, nextValue, "immediate")}
+            className="gap-3"
+          >
+            {field.options.map((option) => {
+              const itemId = `${field.key}-${option.value}`
+
+              return (
+                <Field key={option.value} orientation="horizontal" className="items-start gap-3">
+                  <RadioGroupItem id={itemId} value={option.value} />
+                  <FieldLabel htmlFor={itemId} className="pt-0.5 font-normal">
+                    {option.label}
+                  </FieldLabel>
+                </Field>
+              )
+            })}
+          </RadioGroup>
         </FieldContent>
       </Field>
     )

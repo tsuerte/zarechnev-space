@@ -58,7 +58,7 @@ test("executor fails when unique batch cannot be assembled", () => {
     () =>
       executeZalivatorGenerateRequest({
         generator: "name",
-        quantity: 9,
+        quantity: 71,
         unique: true,
         options: {
           format: "first-name-only",

@@ -29,9 +29,15 @@ export function generateMobilePhone(options: ZalivatorMobilePhoneOptions) {
   const part2 = randomInt(10, 99)
   const part3 = randomInt(10, 99)
 
-  if (options.format === "plain") {
-    return `+7${prefix}${part1}${part2}${part3}`
+  switch (options.format) {
+    case "plain":
+      return `+7${prefix}${part1}${part2}${part3}`
+    case "spaced-hyphen":
+      return `+7 ${prefix} ${part1}-${part2}-${part3}`
+    case "spaced":
+      return `+7 ${prefix} ${part1} ${part2} ${part3}`
+    case "paren-hyphen":
+    default:
+      return `+7 (${prefix}) ${part1}-${part2}-${part3}`
   }
-
-  return `+7 (${prefix}) ${part1}-${part2}-${part3}`
 }
